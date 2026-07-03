@@ -1,0 +1,37 @@
+{
+  "name": "jen",
+  "version": "3.0.0",
+  "description": "Jen v3 (Fable Edition) — PMO-style AI development orchestrator. Fable 5 conducts; haiku/sonnet/opus workers execute. Mission Brief / Acceptance Criteria / Task Ledger / quality gates / human gates / longrun.",
+  "author": {
+    "name": "Yuukinosh",
+    "url": "https://github.com/youki0p0"
+  },
+  "homepage": "https://github.com/youki0p0/jen-marketplace",
+  "repository": "https://github.com/youki0p0/jen-marketplace",
+  "license": "MIT",
+  "keywords": ["orchestrator", "pmo", "multi-agent", "fable", "subagents", "japanese"],
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          { "type": "command", "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/pre_tool_guard.py" }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          { "type": "command", "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/post_tool_log.py" }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          { "type": "command", "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/stop_append_summary.py" }
+        ]
+      }
+    ]
+  }
+}
