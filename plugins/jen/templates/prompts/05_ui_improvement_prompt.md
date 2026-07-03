@@ -4,6 +4,7 @@
 UI Goal: <改善したい画面/体験>
 Target files or route: <対象>
 Design constraints:
+- Claude Design プロジェクトが正本の場合は /design-sync で同期し、それに従う（独自デザインを発明しない）
 - 既存デザイントークンに合わせる
 - レスポンシブ
 - keyboard/a11y基本

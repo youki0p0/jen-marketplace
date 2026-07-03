@@ -23,8 +23,8 @@ Fableの長所は長時間の計画維持・委譲・自己検証であり、手
 6. 確定、未確認、仮定を分ける。
 7. 良い提案は出すが、勝手に仕様へ混ぜない。Now / Human / Later / Reject に分類する。
 8. 長時間作業では `.jen/handoff.md` を更新する。
-9. Fableは PMO と deep-solver の2箇所のみ。PMO(fable)は自分で実装・探索せず委譲に徹する。
-10. 昇格ラダーは haiku → sonnet → opus → fable。fable直行は禁止(deep-solverはopus層失敗後のみ)。
+9. Fableは PMO・architect・deep-solver の3箇所のみ。PMO(fable)は自分で実装・探索せず委譲に徹する。architect(fable)は設計判断に徹し、重い実装はbuilderへ返す。
+10. 昇格ラダーは haiku → sonnet → opus → fable。fable直行は禁止(deep-solverは上位層失敗後のみ。architectは設計判断がトークン軽量・影響最大のため定常でfable)。
 
 ## 初期化
 
@@ -108,7 +108,7 @@ release-managerがPR本文、検証結果、残リスク、ロールバック、
 | 通常検収 | jen-verifier |
 | 高リスク検収 | jen-strict-verifier |
 | PR/リリース準備 | jen-release-manager |
-| opus層が失敗した難問 | jen-deep-solver (fable) |
+| 上位層が失敗した難問 | jen-deep-solver (fable) |
 
 ## 参照
 

@@ -144,7 +144,7 @@ Jen v1のFugu型ルーティングを、v2ではPMO運用へ拡張します。Fu
 | builder | 一般実装 | Sonnet | 主力。安定と速度 |
 | frontend | UI実装 | Sonnet | 既存規約に合わせる |
 | test | テスト設計・実行 | Sonnet | 仕様をテストへ写像する必要あり |
-| architect | 難設計・境界・性能 | Opus | 高難度判断 |
+| architect | 難設計・境界・性能 | Fable | 設計はトークン軽量・下流影響最大のため上流に最高知能を置く（v3.1で昇格） |
 | debugger | 原因不明バグ | Opus | 仮説検証と切り分けが重い |
 | verifier | 通常検収 | Sonnet | v1のHaikuより厳しめにする |
 | strict-verifier | 高リスク検収 | Opus | auth/payment/security/DB/破壊的変更 |
@@ -252,7 +252,7 @@ Jen v3は「PMO型オーケストレーター」です。主な責務は以下�
 | jen-builder | sonnet | write/bash | 一般実装 |
 | jen-frontend | sonnet | write/bash | UI/フロント実装 |
 | jen-test | sonnet | write/bash | テスト追加・実行 |
-| jen-architect | opus | write/bash | 難設計・重要判断 |
+| jen-architect | fable | write/bash | 難設計・重要判断（v3.1でopusから昇格） |
 | jen-debugger | opus | write/bash | 原因不明バグ修復 |
 | jen-verifier | sonnet | read/bash | 通常検収 |
 | jen-strict-verifier | opus | read/bash | 高リスク検収 |
