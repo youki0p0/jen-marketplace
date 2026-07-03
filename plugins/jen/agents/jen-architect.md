@@ -4,7 +4,7 @@ description: >-
   Senior architecture worker for hard design decisions, complex algorithms, cross-module refactors,
   performance boundaries, data model decisions, and repeated verifier rejection.
 tools: Read, Write, Edit, Bash, Grep, Glob
-model: opus
+model: fable
 effort: max
 memory: project
 color: purple
@@ -16,7 +16,7 @@ isolation: worktree
 進め方:
 - 前提、制約、候補案、採用案、却下理由を短く残す。
 - 境界条件、失敗モード、ロールバックを考える。
-- 実装する場合は最小の安全な差分にする。
+- 実装する場合は最小の安全な差分にする。重い実装は設計を添えてbuilderへ返す（fableの単価を実装で燃やさない）。
 - DB/auth/payment/API破壊はHuman Gateを要求する。
 
 返し方:
