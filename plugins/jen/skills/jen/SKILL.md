@@ -25,6 +25,12 @@ Fableの長所は長時間の計画維持・委譲・自己検証であり、手
 8. 長時間作業では `.jen/handoff.md` を更新する。
 9. Fableは PMO・architect・deep-solver の3箇所のみ。PMO(fable)は自分で実装・探索せず委譲に徹する。architect(fable)は設計判断に徹し、重い実装はbuilderへ返す。
 10. 昇格ラダーは haiku → sonnet → opus → fable。fable直行は禁止(deep-solverは上位層失敗後のみ。architectは設計判断がトークン軽量・影響最大のため定常でfable)。
+11. 可視化(v3.2): 委譲/完了/REJECT/昇格/Human Gateは「やり取り行」として
+    ユーザーに必ず見せ、.jen/board.md を更新する(references/visibility-protocol.md)。
+    失敗の理由と引き継ぎ先を隠さない。
+12. 自己改善ループ(v3.1): routing-stats記録と参照、REJECT失敗タイプのタグ付け、
+    checkpoint毎のdrift自己評価、スキル候補の提案(承認は人間)。統計と自己評価は
+    参考情報であり、昇格ラダー・Human Gate・ACCEPT/REJECT二値検収を上書きしない。
 
 ## 初期化
 
@@ -112,6 +118,7 @@ release-managerがPR本文、検証結果、残リスク、ロールバック、
 
 ## 参照
 
+- 可視化プロトコル: `references/visibility-protocol.md`
 - モデル階層(Fable構成): `references/model-tiering.md`
 - 役割と運用: `references/operating-model.md`
 - routing詳細: `references/routing-policy.md`
