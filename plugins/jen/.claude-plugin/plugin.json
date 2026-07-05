@@ -1,6 +1,6 @@
 {
   "name": "jen",
-  "version": "3.0.0",
+  "version": "3.2.0",
   "description": "Jen v3 (Fable Edition) — PMO-style AI development orchestrator. Fable 5 conducts; haiku/sonnet/opus workers execute. Mission Brief / Acceptance Criteria / Task Ledger / quality gates / human gates / longrun.",
   "author": {
     "name": "Yuukinosh",

@@ -1,0 +1,3 @@
+{"ts":"2026-07-05T10:00:00Z","task_id":"T-012","task_type":"frontend","agent":"jen-frontend","model":"sonnet","verdict":"ACCEPT","reject_type":null}
+{"ts":"2026-07-05T11:20:00Z","task_id":"T-013","task_type":"debug","agent":"jen-builder","model":"sonnet","verdict":"REJECT","reject_type":"tool_failure"}
+{"ts":"2026-07-05T11:45:00Z","task_id":"T-013","task_type":"debug","agent":"jen-debugger","model":"opus","verdict":"ESCALATED","reject_type":"drift"}
