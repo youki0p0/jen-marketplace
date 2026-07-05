@@ -12,6 +12,13 @@
 8. 高リスクはstrict-verifier。
 9. 上位層が失敗した問題のみdeep-solver（fable）。
 
+## ルーティング学習（v3.1）
+
+担当割当の前に `.jen/routing-stats.json` を参照する（存在すれば）。
+- 同種タスクで同一担当のREJECTが2回以上 → 別担当または上位ティアを優先
+- 統計は参考情報。昇格ラダーの順序・deep-solver直行禁止・Human Gateは上書きしない
+- 記録はPMOが1タスク完了ごとにJSONL形式で1行追記する
+
 ## 昇格（haiku → sonnet → opus → fable）
 
 - scoutで不足 → research or builder
