@@ -6,9 +6,9 @@
 
 ```
 ┌─────────────────────────────────────────────┐
-│  fable   jen-pmo（指揮）/ architect / jen-deep-solver │  ← 計画・設計・最終昇格
+│  fable   jen-pmo（指揮）/ jen-deep-solver    │  ← 計画維持・委譲・自己検証
 ├─────────────────────────────────────────────┤
-│  opus    debugger / strict-verifier          │
+│  opus    architect / debugger / strict-verifier │
 ├─────────────────────────────────────────────┤
 │  sonnet  builder / frontend / test / research / reviewers │
 ├─────────────────────────────────────────────┤
@@ -21,8 +21,7 @@
 
 - **ゴールだけ渡せばいい** — Jen が Mission Brief / 受入条件 / タスク台帳を作り、18体の専門エージェントに振り分ける
 - **「完成」を雰囲気で言わない** — Verifier（検収専任）が ACCEPT するまで完了扱いにしない。実装者と検証者を分離
-- **コストが暴れない** — 単価の高い Fable 5 は指揮（jen-pmo）・設計（jen-architect）・最終昇格先（jen-deep-solver）の3箇所のみ。トークンを大量に消費する実装・探索は haiku / sonnet
-- **デザインは発明しない** — Claude Design（claude.ai/design）のデザインシステムを正本とし、`/design-sync` で同期。jen-frontend は正本に忠実に実装する
+- **コストが暴れない** — 単価の高い Fable 5 は指揮（jen-pmo）と最終昇格先（jen-deep-solver）の2箇所のみ。手足は haiku / sonnet
 - **勝手に壊さない** — DB破壊・deploy・secret・auth/payment は Human Gate で必ず停止。危険コマンドは PreToolUse hook でブロック
 - **多日自走できる** — longrun モードはチェックポイント・handoff・品質ゲートを挟みながら完了まで回り続ける（Fable 5 の長時間自律性を活用）
 
