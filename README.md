@@ -6,9 +6,9 @@
 
 ```
 ┌─────────────────────────────────────────────┐
-│  fable   jen-pmo（指揮）/ architect / jen-deep-solver │  ← 計画・設計・最終昇格
+│  fable   jen-pmo（指揮）/ jen-deep-solver    │  ← 計画維持・委譲・自己検証
 ├─────────────────────────────────────────────┤
-│  opus    debugger / strict-verifier          │
+│  opus    architect / debugger / strict-verifier │
 ├─────────────────────────────────────────────┤
 │  sonnet  builder / frontend / test / research / reviewers │
 ├─────────────────────────────────────────────┤
@@ -21,10 +21,17 @@
 
 - **ゴールだけ渡せばいい** — Jen が Mission Brief / 受入条件 / タスク台帳を作り、18体の専門エージェントに振り分ける
 - **「完成」を雰囲気で言わない** — Verifier（検収専任）が ACCEPT するまで完了扱いにしない。実装者と検証者を分離
-- **コストが暴れない** — 単価の高い Fable 5 は指揮（jen-pmo）・設計（jen-architect）・最終昇格先（jen-deep-solver）の3箇所のみ。トークンを大量に消費する実装・探索は haiku / sonnet
-- **デザインは発明しない** — Claude Design（claude.ai/design）のデザインシステムを正本とし、`/design-sync` で同期。jen-frontend は正本に忠実に実装する
+- **コストが暴れない** — 単価の高い Fable 5 は指揮（jen-pmo）と最終昇格先（jen-deep-solver）の2箇所のみ。手足は haiku / sonnet
 - **勝手に壊さない** — DB破壊・deploy・secret・auth/payment は Human Gate で必ず停止。危険コマンドは PreToolUse hook でブロック
 - **多日自走できる** — longrun モードはチェックポイント・handoff・品質ゲートを挟みながら完了まで回り続ける（Fable 5 の長時間自律性を活用）
+
+## v3.4 の新要素 — ループガード
+
+エージェントループの三大事故「止まらない・空転する・同じ手を繰り返す」を構造で封じます。同一アプローチの3回目は禁止（STUCK→担当替え/昇格）、台帳が2サイクル動かなければブレーカーが作動して**戦略ごと引き直し**（外側リセット）、実行なしの再計画は2回まで。停止するときも「何ができて・なぜ止まり・人間は何をすればいいか」の3点報告が義務です。
+
+## v3.3 の新要素 — 教訓台帳
+
+失敗を「直して終わり」にしません。解決のたびに考察と解決策が `.jen/lessons.md` に資産化され、同種タスクの委譲時に再発防止ルールが自動注入されます。それでも同じ過ちが起きたら `[再発:L-xxx]` として⚠️付きで可視化され、ルールが委譲指示の先頭に固定されます。**使うほど、同じ失敗をしなくなる。**
 
 ## v3.2 の新要素 — 作業の可視化
 
@@ -40,6 +47,18 @@
 
 実行するたびに賢くなる、を安全側に倒して実装：ルーティング学習（担当×検収結果の記録・参照）、REJECT失敗タイプのタグ付け、longrunのドリフト自己監視、スキル候補の自動提案（**採用判断は人間**）。統計と自己評価はあくまで参考情報で、昇格ラダー・Human Gate・二値検収を上書きしません。詳細は [CHANGELOG.md](CHANGELOG.md)。
 
+## エディションを選ぶ
+
+| | jen（Fable版） | jen-classic（Opus版） |
+|---|---|---|
+| 指揮モデル | Fable 5 | Opus 4.8 |
+| 前提 | Fable 5が使えるプラン | 通常プランでOK |
+| longrun | 多日自走 | 8サイクル毎にセッションローテーション |
+| 最終昇格 | deep-solver(fable)単独 | opus合議制（独立仮説×2→統合） |
+| コスト | 指揮が高単価（2箇所限定で抑制） | 合議込みでfable昇格と同水準 |
+
+**どちらか片方だけ**をインストールしてください（agent名が共通のため同時有効化は競合します）。
+
 ## インストール
 
 ```bash
@@ -51,8 +70,12 @@ Claude Code 内で：
 
 ```
 /plugin marketplace add youki0p0/jen-marketplace
-/plugin install jen@jen-marketplace
-/model fable
+/plugin install jen@jen-marketplace          # Fable版
+#  または
+/plugin install jen-classic@jen-marketplace  # Opus版(Fable不要)
+
+/model fable   # Fable版の場合
+/model opus    # Classic版の場合
 ```
 
 以上。リポジトリに何も展開しません（状態ファイル `.jen/` は実行時に作られます）。

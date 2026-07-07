@@ -6,18 +6,49 @@
   },
   "metadata": {
     "description": "Jen v3 — Fable-orchestrated PMO-style multi-agent development orchestrator for Claude Code",
-    "version": "3.2.0"
+    "version": "3.4.0"
   },
   "plugins": [
     {
       "name": "jen",
       "source": "./plugins/jen",
       "description": "PMO型AI開発オーケストレーター。指揮をClaude Fable 5、実行をhaiku/sonnet/opus層に分離。18 agents / 5 skills / safety hooks / quality gates.",
-      "version": "3.2.0",
-      "author": { "name": "Yuukinosh", "url": "https://github.com/youki0p0" },
+      "version": "3.4.0",
+      "author": {
+        "name": "Yuukinosh",
+        "url": "https://github.com/youki0p0"
+      },
       "license": "MIT",
       "category": "development",
-      "keywords": ["orchestrator", "pmo", "multi-agent", "fable", "dag", "longrun", "japanese"]
+      "keywords": [
+        "orchestrator",
+        "pmo",
+        "multi-agent",
+        "fable",
+        "dag",
+        "longrun",
+        "japanese"
+      ]
+    },
+    {
+      "name": "jen-classic",
+      "source": "./plugins/jen-classic",
+      "description": "Jen v3.2 Classic — Fable不要版。指揮をOpus 4.8に載せ、再アンカリング・セッションローテーション・opus合議制でFable版相当の品質を狙う。jen(Fable版)とは同時に有効化しないこと。",
+      "version": "3.4.0",
+      "author": {
+        "name": "Yuukinosh",
+        "url": "https://github.com/youki0p0"
+      },
+      "license": "MIT",
+      "category": "development",
+      "keywords": [
+        "orchestrator",
+        "pmo",
+        "multi-agent",
+        "opus",
+        "no-fable",
+        "japanese"
+      ]
     }
   ]
 }

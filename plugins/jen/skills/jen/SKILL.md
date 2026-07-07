@@ -23,12 +23,19 @@ Fableの長所は長時間の計画維持・委譲・自己検証であり、手
 6. 確定、未確認、仮定を分ける。
 7. 良い提案は出すが、勝手に仕様へ混ぜない。Now / Human / Later / Reject に分類する。
 8. 長時間作業では `.jen/handoff.md` を更新する。
-9. Fableは PMO・architect・deep-solver の3箇所のみ。PMO(fable)は自分で実装・探索せず委譲に徹する。architect(fable)は設計判断に徹し、重い実装はbuilderへ返す。
-10. 昇格ラダーは haiku → sonnet → opus → fable。fable直行は禁止(deep-solverは上位層失敗後のみ。architectは設計判断がトークン軽量・影響最大のため定常でfable)。
+9. Fableは PMO と deep-solver の2箇所のみ。PMO(fable)は自分で実装・探索せず委譲に徹する。
+10. 昇格ラダーは haiku → sonnet → opus → fable。fable直行は禁止(deep-solverはopus層失敗後のみ)。
 11. 可視化(v3.2): 委譲/完了/REJECT/昇格/Human Gateは「やり取り行」として
     ユーザーに必ず見せ、.jen/board.md を更新する(references/visibility-protocol.md)。
     失敗の理由と引き継ぎ先を隠さない。
-12. 自己改善ループ(v3.1): routing-stats記録と参照、REJECT失敗タイプのタグ付け、
+12. 教訓台帳(v3.3): 失敗解決時は考察と解決策を .jen/lessons.md に記載し、
+    委譲前に該当する再発防止ルールを注入する。再発([再発:L-xxx])は⚠️で可視化し
+    ルールを委譲promptの先頭に固定する(references/lessons-protocol.md)。
+13. ループガード(v3.4): 同一アプローチ3回目禁止(STUCK→担当替え/昇格)、
+    台帳2サイクル無変化でブレーカー→外側リセット(タスク分解から引き直し、
+    1ミッション2回まで)、実行なし再計画は2回まで、委譲は最小コンテキスト、
+    停止時はgraceful failure報告(references/loop-guards.md)。
+14. 自己改善ループ(v3.1): routing-stats記録と参照、REJECT失敗タイプのタグ付け、
     checkpoint毎のdrift自己評価、スキル候補の提案(承認は人間)。統計と自己評価は
     参考情報であり、昇格ラダー・Human Gate・ACCEPT/REJECT二値検収を上書きしない。
 
@@ -114,11 +121,13 @@ release-managerがPR本文、検証結果、残リスク、ロールバック、
 | 通常検収 | jen-verifier |
 | 高リスク検収 | jen-strict-verifier |
 | PR/リリース準備 | jen-release-manager |
-| 上位層が失敗した難問 | jen-deep-solver (fable) |
+| opus層が失敗した難問 | jen-deep-solver (fable) |
 
 ## 参照
 
 - 可視化プロトコル: `references/visibility-protocol.md`
+- 教訓台帳: `references/lessons-protocol.md`
+- ループガード: `references/loop-guards.md`
 - モデル階層(Fable構成): `references/model-tiering.md`
 - 役割と運用: `references/operating-model.md`
 - routing詳細: `references/routing-policy.md`

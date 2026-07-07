@@ -10,7 +10,7 @@
 6. 難設計はarchitect。
 7. 完了候補はverifier。
 8. 高リスクはstrict-verifier。
-9. 上位層が失敗した問題のみdeep-solver（fable）。
+9. opus層が失敗した問題のみdeep-solver（fable）。
 
 ## ルーティング学習（v3.1）
 
@@ -26,8 +26,8 @@
 - frontend失敗 → test/ux-critic/debugger
 - test失敗 → debugger
 - verifier REJECT 1回 → 該当担当へ差し戻し
-- verifier REJECT 2回 → 上位層（architect[fable]/debugger[opus]）へ昇格
-- verifier REJECT 3回 or 上位層失敗 → jen-deep-solver（fable）へ昇格
+- verifier REJECT 2回 → opus系（architect/debugger）へ昇格
+- verifier REJECT 3回 or opus層失敗 → jen-deep-solver（fable）へ昇格
 - deep-solver失敗 or strict-verifier REJECT → Human Gate
 
 deep-solver呼び出し時は、それまでの失敗履歴（試した修正・REJECT理由）を

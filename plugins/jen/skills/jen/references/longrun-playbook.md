@@ -48,6 +48,14 @@ board.md の進行中テーブルを handoff.md へ転記する。長時間の�
 - コストチェックポイント: 5 cycleごとに「fableで処理した工程のうちsonnet以下へ
   委譲できたものはないか」を1行で自己監査し `.jen/decisions.md` に残す。
 
+## Loop guards (v3.4)
+
+- 2サイクル連続で台帳無変化 → ブレーカー作動 → 外側リセット（loop-guards.md）。
+  リセット2回で解決しなければHuman Gate。
+- どの停止でも graceful failure 報告（達成分/未達理由(確定・推測区別)/回復アクション）
+  を必ず出す。無言停止禁止。
+- compactionやセッション切替で消えて困る決定はその場で decisions.md へ書く。
+
 ## Stop conditions
 
 - All AC pass.
