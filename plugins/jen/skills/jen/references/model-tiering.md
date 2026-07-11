@@ -14,6 +14,16 @@ Claude Fable 5 の長所そのものであり、実装・調査などの手足�
 | 上位実行 | architect / debugger / strict-verifier | opus | 難設計・不明バグ・高リスク検収 |
 | 最終昇格 | jen-deep-solver | fable | opus 層が失敗した問題のみ |
 
+### architect は opus のまま（検討したが不採用）
+
+「設計はトークン軽量・下流影響最大だから fable にすべき」という案を検討したが、
+実測比率（下記「目標分布」）と整合しないため不採用とした。architect は
+「難所だけ」とはいえ deep-solver（真の最終手段）より高頻度で発火するため、
+fable へ動かすと fable の呼び出しシェアが目標の約4%から2倍以上に膨らみ、
+単価差（fable は opus の約2倍）がそのままコスト増に直結する。
+上位実行3体（architect/debugger/strict-verifier）を opus に揃えたまま
+呼び出し頻度で自然に絞る方が、実測で「バランスがいい」比率を再現できる。
+
 ## Escalation Ladder
 
 ```
@@ -31,6 +41,37 @@ haiku → sonnet → opus → fable (jen-deep-solver)
 - したがって Fable を使うのは **PMO と deep-solver の2箇所だけ**。
 - PMO は自分で実装・探索しない（v2 から継続の最重要ルール）。Fable の PMO が
   手を動かし始めるとコストとコンテキストが同時に汚れる。
+
+## 目標分布（v3.5、実測ベース）
+
+手動運用での体感から得られた呼び出し比率 **sonnet : opus : fable ≈ 20 : 4 : 1**
+（呼び出し数シェアで sonnet 80% / opus 16% / fable 4%）を、この設計が
+狙っている分布として明文化する。厳密な割当ノルマではなく、
+「今の担当×モデル構成が続く限り自然にこの近辺へ収束するはず」という
+健全性チェックの基準値。
+
+参考: 単価差込みのコスト内訳（出力寄り加重の概算）は
+sonnet 約67% / opus 約22% / fable 約11%。呼び出し数では少数派の
+opus/fable が、単価の高さでコストシェアを押し上げる形が想定どおり。
+
+## Ratio Guard（比率監視）
+
+自己改善ループ（v3.1）が書く `.jen/routing-stats.json` から実測比率を出し、
+目標分布からの乖離を検知する。強制停止はしない（v3.4の不変条件どおり、
+数値によるhard-stop自動化はしない）。PMOへの自己点検シグナルとして扱う。
+
+- `/jen:jen-status` が `.jen/routing-stats.json` を集計し
+  `sonnet:opus:fable` の実測比率を表示する（`jen_status.py` 参照）。
+- **sonnet:opus の目安は 5:1**。3:1を下回ったら
+  「本来sonnetで済む案件をopusへ昇格しすぎていないか」をPMOが点検し、
+  REJECT基準（2回で昇格）を守れているか確認する。8:1を上回るのは
+  単に難所が少なかっただけで悪い兆候ではない。
+- **opus:fable の目安は 4:1**。2:1を下回ったら
+  「deep-solverが多発していないか」「classifierフォールバックでopus層が
+  fable相当のコストを静かに食っていないか」（運用上の注意 #3参照）を
+  PMOが点検し、`.jen/decisions.md` に一行残す。
+- longrun の checkpoint 毎、または conduct/route で20タスク処理毎に
+  自己点検する（routing-policy.md参照）。
 
 ## 運用上の注意（実測ベースの落とし穴）
 

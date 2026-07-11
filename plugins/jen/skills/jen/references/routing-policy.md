@@ -19,6 +19,14 @@
 - 統計は参考情報。昇格ラダーの順序・deep-solver直行禁止・Human Gateは上書きしない
 - 記録はPMOが1タスク完了ごとにJSONL形式で1行追記する
 
+## Ratio Guard 自己点検（v3.5）
+
+longrun の checkpoint 毎、または conduct/route で20タスク処理毎に、
+`.jen/routing-stats.json` から sonnet:opus:fable 比率を集計し
+`references/model-tiering.md` の「目標分布」（約20:4:1）と比較する。
+乖離を検知したら `.jen/decisions.md` に一行残し、次の委譲判断に反映する
+（強制停止はしない）。詳細: `model-tiering.md`
+
 ## 昇格（haiku → sonnet → opus → fable）
 
 - scoutで不足 → research or builder

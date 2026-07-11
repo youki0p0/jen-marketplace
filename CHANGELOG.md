@@ -1,5 +1,29 @@
 # Changelog
 
+## v3.5.0 (2026-07-08) — Ratio Guard（jenのみ、jen-classicは対象外）
+
+手動運用で観測された呼び出し比率 sonnet:opus:fable ≈ 20:4:1 を、
+狙っていた分布として明文化し、自己改善ループ（v3.1）の記録から
+実測できるようにした。
+
+### 追加（jen edition のみ。jen-classicはFableを使わないため対象外）
+- **目標分布の明文化**: `references/model-tiering.md` に「目標分布」
+  （sonnet 80% / opus 16% / fable 4%、コスト按分約67/22/11%）を追加
+- **architect を opus のまま維持する根拠を明記**: fable昇格案は検討したが、
+  fableへ動かすとfableの呼び出しシェアが目標の2倍以上に膨らみ実測比率と
+  乖離するため不採用（採用しなかったもの、として記録）
+- **Ratio Guard 自己点検**: `.jen/routing-stats.json` から実測比率を集計し
+  目標分布との乖離を検知。sonnet:opus < 3:1 で昇格しすぎ疑い、
+  opus:fable < 2:1 でdeep-solver多用/classifierフォールバック疑いを
+  `.jen/decisions.md` へ一行記録（強制停止はしない、自己点検のみ）
+- **`/jen:jen-status` 拡張**: `jen_status.py` が routing-stats.json を集計し
+  sonnet:opus:fable の実測比率と目標との差分を表示する
+
+### 採用しなかったもの
+- architect の fable 昇格 — 実測比率と乖離するため見送り（上記参照）
+- 比率逸脱時のhooksによる強制停止 — v3.4と同じ理由（数値ベースのhard-stopは
+  プラグインからの計測が不正確になりやすい）で自己点検止まりに統一
+
 ## v3.4.0 (2026-07-07) — ループガード＆コンテキスト衛生
 
 2026年のループエンジニアリング知見（無進捗検知、外側ループリセット、

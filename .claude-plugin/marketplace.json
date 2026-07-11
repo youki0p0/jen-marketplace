@@ -6,14 +6,14 @@
   },
   "metadata": {
     "description": "Jen v3 — Fable-orchestrated PMO-style multi-agent development orchestrator for Claude Code",
-    "version": "3.4.0"
+    "version": "3.5.0"
   },
   "plugins": [
     {
       "name": "jen",
       "source": "./plugins/jen",
       "description": "PMO型AI開発オーケストレーター。指揮をClaude Fable 5、実行をhaiku/sonnet/opus層に分離。18 agents / 5 skills / safety hooks / quality gates.",
-      "version": "3.4.0",
+      "version": "3.5.0",
       "author": {
         "name": "Yuukinosh",
         "url": "https://github.com/youki0p0"
