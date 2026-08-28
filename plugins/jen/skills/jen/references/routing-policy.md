@@ -62,8 +62,10 @@ deep-solver呼び出し時は、それまでの失敗履歴（試した修正・
 - 仕様がまだ揺れている。
 - テストが存在せず検証不能。
 
-## nested subagents（v3新設）
+## 委譲権限（v3.8で訂正）
 
-builder/architect/debuggerは自分専用のread-only scout（haiku）のみ
-子として起動してよい。実装系の再委譲はPMOへ返す。
+`tools:` は許可リストであり、`Agent`（委譲ツール）を持つのは **jen-pmo のみ**。
+worker は自分でscoutを含む他agentを起動できない。探索が必要なら**PMOへ差し戻す**。
+（v3.7以前の「builder/architect/debuggerが自分専用scoutを起動してよい」は
+どのagentも `Agent` を持っておらず実現不能だったため撤回）
 詳細: `model-tiering.md`

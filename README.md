@@ -6,7 +6,9 @@
 
 ```
 ┌─────────────────────────────────────────────┐
-│  fable   jen-pmo（指揮）/ jen-deep-solver    │  ← 計画維持・委譲・自己検証
+│  (relay) メインセッション                    │  ← 原文を運ぶだけ。指揮はしない
+├─────────────────────────────────────────────┤
+│  fable   jen-pmo（唯一の指揮）/ jen-deep-solver │  ← 計画維持・委譲・自己検証
 ├─────────────────────────────────────────────┤
 │  opus    architect / debugger / strict-verifier │
 ├─────────────────────────────────────────────┤
@@ -19,6 +21,7 @@
 
 ## なにが嬉しいの？
 
+- **伝言ゲームがない（v3.8）** — メインセッションはユーザーの言葉を*一字一句そのまま* `.jen/inbox.md` に保全して jen-pmo へ渡すだけ。要約・解釈をしないので、途中で意図が化けても原文に必ず戻れる
 - **ゴールだけ渡せばいい** — Jen が Mission Brief / 受入条件 / タスク台帳を作り、18体の専門エージェントに振り分ける
 - **「完成」を雰囲気で言わない** — Verifier（検収専任）が ACCEPT するまで完了扱いにしない。実装者と検証者を分離
 - **コストが暴れない** — 単価の高い Fable 5 は指揮（jen-pmo）と最終昇格先（jen-deep-solver）の2箇所のみ。手足は haiku / sonnet
@@ -74,7 +77,7 @@ Claude Code 内で：
 #  または
 /plugin install jen-classic@jen-marketplace  # Opus版(Fable不要)
 
-/model fable   # Fable版の場合
+/model fable   # 任意。v3.8以降メインセッションは伝言役なので必須ではない
 /model opus    # Classic版の場合
 ```
 
@@ -144,7 +147,7 @@ plugins/jen/
 │                architect, debugger, verifier×2, reviewer×4,
 │                strategist, ideation, release-manager, deep-solver）
 ├─ skills/      jen / jen-longrun / jen-repair / jen-review / jen-release
-├─ commands/    jen-status / jen-standup / jen-pr
+├─ commands/    jen-status / jen-board / jen-standup / jen-pr / jen-audit
 ├─ hooks/       破壊的操作ガード＋ローカルログ
 └─ templates/   memory / prompts / report テンプレート
 ```

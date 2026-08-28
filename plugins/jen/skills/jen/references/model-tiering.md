@@ -94,8 +94,14 @@ v3.5では両者を同一視して「opus:fable ≈ 4:1 が健全」と書いて
 
 ## 運用上の注意（実測ベースの落とし穴）
 
-1. **メインセッションを Fable にする**: `/model fable`。Claude Code v2.1.170 以降が必要
-   （古い場合は `claude update`）。
+1. **メインセッションのモデル（v3.8で意味が変わった）**: v3.7までは
+   メインセッション自身がPMOだったため `/model fable` が必須だった。
+   v3.8ではメインセッションは**伝言役**であり、PMOは `jen-pmo` subagent
+   （frontmatterで `model: fable` 固定、セッションのモデルとは独立）が担う。
+   したがってメインセッションを fable にする必然性は無くなり、**コスト削減の
+   余地になった**。ただし伝言役に求められるのは「原文を絶対に要約しない」という
+   指示追従の忠実性そのものなので、極端に安いモデルは避ける。
+   Claude Code v2.1.170 以降が必要（古い場合は `claude update`）。
 2. **`CLAUDE_CODE_SUBAGENT_MODEL` を確認**: この環境変数が設定されていると、
    agents の frontmatter `model:` 指定を上書きし、fable 指定の agent が別モデルで
    静かに動く。`unset CLAUDE_CODE_SUBAGENT_MODEL` するか `inherit` を外す。
@@ -104,20 +110,33 @@ v3.5では両者を同一視して「opus:fable ≈ 4:1 が健全」と書いて
    handoff を更新して新セッションで再開する（longrun-playbook 参照）。
 4. **thinking は常時 ON**: Fable 5 は adaptive thinking を無効化できない。
    effort で調整する（PMO / deep-solver は max、それ以外は agent 定義に従う）。
-5. **agent frontmatter の一部キーはサポート未検証（v3.7.2で明記）**:
-   agentファイルで使っている `model` / `tools` / `name` / `description` は
-   公式にサポートされているが、`effort` / `memory` / `isolation` / `color` が
-   Claude Codeハーネスに実際に解釈されるかはJen側で検証していない。
+5. **agent frontmatter のキー（v3.8で調査結果を反映）**:
+   公式にサポートが確認できたもの — `name` / `description` / `tools`（許可リスト）/
+   `model` / `memory`（`user`｜`project`｜`local`）/ `background`。
+   **未確認** — `effort` / `isolation` / `color`。
    無視されている場合、`isolation: worktree`（6 agents）はワークツリー分離を
    しておらず、`effort: max` も効いていない可能性がある。
    **分離を前提にした安全設計（並列実行で同じファイルを触る等）はしないこと** —
    並列化の可否は routing-policy.md の条件で判断する。
+6. **`tools:` を書いた時点で許可リストになる**。省略すれば継承だが、Jenは全agentで
+   明記しているため、書いていないツールは使えない。`Agent`（委譲）を持つのは
+   `jen-pmo` のみ（下記「subagent の委譲権限」）。
 
-## nested subagents
+## subagent の委譲権限（v3.8で訂正）
 
-Claude Code は subagent がさらに subagent を起動できる。v3 では以下のみ許可する:
+`tools:` は**許可リスト**であり、`Agent`（サブエージェント起動ツール。旧称 Task）を
+明記していない agent は**構造的に委譲できない**。
 
-- 許可: builder / architect / debugger が **自分専用の scout（haiku）** を起動して
-  read-only 探索を任せる。
-- 禁止: specialist が別の実装系 agent を起動する（責任境界と Task Ledger が壊れる）。
-  実装の再委譲が必要なら PMO へ返す。
+- **委譲できるのは `jen-pmo` だけ**（`tools:` に `Agent` を持つ唯一の agent）。
+  オーケストレーションの単一責任をここに集約している。
+- worker（builder / architect / debugger 等）は `Agent` を持たない。
+  探索が必要でも自分でscoutを起動することはできず、**PMOへ差し戻す**。
+- v3.7以前は「builder/architect/debugger が自分専用の scout を起動してよい」と
+  記載していたが、どの agent も `tools:` に `Agent` を持っておらず**実現不能な
+  記述だった**ため撤回した。
+
+> ⚠️ 未検証: インタラクティブセッション（fork mode ON が既定）ではサブエージェントは
+> background 実行になり、公式ドキュメントの「background subagent が保持する組み込み
+> ツール」一覧に `Agent` は含まれていない。一方で「既定で3階層まで入れ子にできる」
+> という記述もあり競合している。jen-pmo が委譲できない場合の回避策は
+> `references/relay-protocol.md`「前提条件」を参照。

@@ -37,10 +37,10 @@ Jenというシステム自身の地図。
   referenceファイルへのリンクなど）を機械的に突き合わせて`issues`へ列挙する。
   scout自身は直さない — 直すかどうかはPMO/人間の判断。
 - **必ず見る既知のドリフト源**（v3.7.2で追加。過去に実際にズレた箇所）:
-  1. `skills/jen/SKILL.md`（メインセッション=PMOとして振る舞う指示）と
-     `agents/jen-pmo.md`（subagent版PMO）は**同じ規律を二重に定義**している。
-     可視化/ループガード/教訓台帳/コンテキストスコープ/行動監査の各節が
-     両方に存在し、手動同期が必要。**両者の記述が矛盾していないか**を確認する。
+  1. **v3.8で解消済み**: PMO規律は `agents/jen-pmo.md` が単一の正になった。
+     `skills/jen/SKILL.md` は伝言役の定義のみを持つ。SKILL.mdに
+     タスク分解・ルーティング表・品質ゲートの記述が**復活していないか**を確認する
+     （復活していたら伝言ゲームが再発している）。
   2. `references/model-tiering.md` のモデル表と、各 `agents/*.md` の
      `model:` frontmatter の一致。
   3. コマンド参照の名前空間（Fable版は `/jen:`、Classicは `/jen-classic:`）が
@@ -92,6 +92,8 @@ Jenというシステム自身の地図。
 | ルーティング記録の整合性 | tool-events.jsonlから読み取れるagent別委譲回数 | routing-stats.jsonの記録件数 | 昇格・委譲の記録漏れ／過少申告（Ratio Guardを持つのはFable版のみ。Classicではルーティング記録の網羅性だけを見る） |
 | コンテキストスコープ遵守 | 委譲promptの内容（取得できれば） | — | 「全部読んで」的な指示が残っていないか |
 | ループガード遵守 | 同一task_idへの近似委譲の反復回数 | board.md上のSTUCK/昇格記録 | ブレーカーが機能せず同じ手を繰り返していないか |
+| **伝言の忠実性（v3.8）** | tool-events.jsonl中のjen-pmo委譲prompt | `.jen/inbox.md` の `[IN-xxx]` 原文 | メインセッションが原文を要約して渡していないか／委譲promptが原文と矛盾していないか |
+| **メインセッションの越権（v3.8）** | tool-events.jsonlのAgent呼び出し先 | — | jen-pmo以外へメインセッションが直接委譲していないか（伝言役の逸脱） |
 
 ### 判定は3値
 

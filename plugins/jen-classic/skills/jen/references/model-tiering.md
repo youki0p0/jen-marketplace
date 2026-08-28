@@ -10,7 +10,10 @@
 | 上位実行 | architect / debugger / strict-verifier | opus | |
 | 最終昇格 | jen-deep-solver | opus + 合議制 | 単独fableの代替（下記） |
 
-メインセッションは `/model opus` を推奨。
+メインセッションは v3.8 で**伝言役**になったため、PMOを兼ねない。
+PMOは `jen-pmo` subagent（frontmatterで `model: opus` 固定、セッションのモデルとは独立）。
+したがってメインセッションのモデルはコスト削減の余地になったが、
+伝言役に求められるのは「原文を要約しない」指示追従の忠実性なので極端に安いモデルは避ける。
 
 ## Fableとの差分と構造補償
 
@@ -50,3 +53,17 @@ haiku → sonnet → opus → opus合議(jen-deep-solver) → Human Gate
 - `CLAUDE_CODE_SUBAGENT_MODEL` は未設定に（Fable版と同じ罠）。
 - jen（Fable版）と jen-classic を**同時に有効化しない**こと。
   agent名が同一のため競合する。切り替えは片方を disable してから。
+
+## subagent の委譲権限（v3.8で訂正）
+
+`tools:` は**許可リスト**であり、`Agent`（サブエージェント起動ツール。旧称 Task）を
+明記していない agent は**構造的に委譲できない**。
+
+- **委譲できるのは `jen-pmo` だけ**（`tools:` に `Agent` を持つ唯一の agent）。
+- worker は `Agent` を持たないため、探索が必要でも**PMOへ差し戻す**。
+- v3.7以前の「builder/architect/debugger が自分専用の scout を起動してよい」は
+  実現不能な記述だったため撤回した。
+
+> ⚠️ 未検証: インタラクティブセッションではサブエージェントが background 実行になり、
+> `Agent` が保持されるか公式ドキュメントの記述が競合している。
+> 回避策は `references/relay-protocol.md`「前提条件」を参照。
