@@ -1,5 +1,38 @@
 # Changelog
 
+## v3.8.1 (2026-08-28) — 最新世代モデルへの追随（jen / jen-classic 共通）
+
+ドキュメント修正のみ。**エージェントの動作は変わらない。**
+
+### 背景
+Jenの全18エージェントの `model:` は最初から `fable` / `opus` / `sonnet` / `haiku` の
+**世代エイリアス**であり、特定バージョンIDを固定していない。したがって Claude 側の
+世代交代（Opus 4.8 → Opus 5、Sonnet 4系 → Sonnet 5）には**すでに自動追随していた**。
+一方で散文側は追随せず、旧世代名「Opus 4.8」が10箇所に残っていた。
+
+### 変更
+- 散文中の「Opus 4.8」を **Opus 5** に更新（10箇所）:
+  `.claude-plugin/marketplace.json` / `README.md` /
+  両エディションの `SKILL.md`・`agents/jen-pmo.md`・`agents/jen-deep-solver.md`・
+  `plugin.json`・`references/model-tiering.md`・`references/longrun-playbook.md`
+- **Ratio Guard のコスト内訳を引き直した**（`plugins/jen/.../model-tiering.md`）。
+  Sonnet 5 が $2/$10 になったため、出力寄り加重の概算を
+  `sonnet 約67% / opus 約22% / fable 約11%` → **`sonnet 約57% / opus 約29% / fable 約14%`** へ更新。
+  **呼び出し比率 20:4:1 は変更なし** — sonnet が相対的に安くなった分、同じ呼び出し
+  構成でもコストが上位層へ寄っただけ。判断の目安は呼び出し数ベースなので影響なし。
+- コスト規律の記述「Fable 5 の API 単価は Opus の約2倍」「Opus は Fable 5 の約半額」は
+  Opus 5（$5/$25）と Fable 5（$10/$50）でも成立するため、**関係式はそのまま**、名称のみ更新。
+- 両エディションの `model-tiering.md` に「**モデル指定は世代エイリアス**」節を新設。
+  何が自動追随して何が追随しないかを明文化した。
+- スキルマップ整合性チェック（`behavior-audit.md`）の「既知のドリフト源」に
+  **散文中のモデルバージョン番号**を追加。今回の10箇所ズレを再発検知対象にした。
+- `plugin.json` / `marketplace.json` の製品名から古い版数を除去
+  （`Jen v3.2 Classic` → `Jen v3 Classic`）。
+
+### 執筆時点の解決先
+`fable` = Claude Fable 5 / `opus` = Claude Opus 5 /
+`sonnet` = Claude Sonnet 5 / `haiku` = Claude Haiku 4.5
+
 ## v3.8.0 (2026-08-28) — Relay Edition: メインセッションを伝言役へ降格（jen / jen-classic 共通）
 
 **破壊的変更**。v3.7まではメインセッション自身がPMOを兼ね、ユーザー入力を解釈して

@@ -1,7 +1,7 @@
 ---
 name: jen-deep-solver
 description: >-
-  Last-resort council synthesizer on Claude Opus 4.8. Use ONLY when opus-tier agents (architect/debugger) have failed,
+  Last-resort council synthesizer on Claude Opus 5. Use ONLY when opus-tier agents (architect/debugger) have failed,
   when the verifier has rejected 3+ times, or when the PMO explicitly escalates a mission-critical design, migration,
   or unexplained failure. Works long-horizon: plans across stages, writes its own verification, and reports evidence.
 tools: Read, Write, Edit, Bash, Grep, Glob, WebSearch, WebFetch

@@ -54,7 +54,7 @@
 
 | | jen（Fable版） | jen-classic（Opus版） |
 |---|---|---|
-| 指揮モデル | Fable 5 | Opus 4.8 |
+| 指揮モデル | Fable 5 | Opus 5 |
 | 前提 | Fable 5が使えるプラン | 通常プランでOK |
 | longrun | 多日自走 | 8サイクル毎にセッションローテーション |
 | 最終昇格 | deep-solver(fable)単独 | opus合議制（独立仮説×2→統合） |

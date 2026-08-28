@@ -14,6 +14,23 @@ Claude Fable 5 の長所そのものであり、実装・調査などの手足�
 | 上位実行 | architect / debugger / strict-verifier | opus | 難設計・不明バグ・高リスク検収 |
 | 最終昇格 | jen-deep-solver | fable | opus 層が失敗した問題のみ |
 
+### モデル指定は世代エイリアス（v3.8.1で明文化）
+
+上表・各 `agents/*.md` の `model:` は **`fable` / `opus` / `sonnet` / `haiku` の
+エイリアス**であり、`claude-opus-5` のような特定バージョンIDを固定していない。
+したがって Claude 側の世代が上がれば、Jen 側を書き換えなくても各層は
+**自動的に最新世代へ解決される**。
+
+- ドキュメント本文にバージョン番号（「Opus 5」等）が出てくるのは
+  **説明のための例示**であって、動作を決めているのはエイリアスの方である。
+- 逆に言えば、本文のバージョン番号は放置すると古くなる。skillmap 整合性
+  チェック（behavior-audit.md）の「既知のドリフト源」として扱い、
+  世代が変わったら本文側を追随させる。
+- 特定バージョンへ固定したい場合のみ、`model:` にモデルIDを直接書く
+  （その時点で自動追随はしなくなる）。
+- 執筆時点の解決先: fable=Claude Fable 5 / opus=Claude Opus 5 /
+  sonnet=Claude Sonnet 5 / haiku=Claude Haiku 4.5。
+
 ### architect は opus のまま（検討したが不採用）
 
 「設計はトークン軽量・下流影響最大だから fable にすべき」という案を検討したが、
@@ -37,7 +54,7 @@ haiku → sonnet → opus → fable (jen-deep-solver)
 
 ## コスト規律
 
-- Fable 5 の API 単価は Opus 4.8 の約2倍。サブスク利用でも消費が速い。
+- Fable 5 の API 単価は Opus 5 の約2倍。サブスク利用でも消費が速い。
 - したがって Fable を使うのは **PMO と deep-solver の2箇所だけ**。
 - PMO は自分で実装・探索しない（v2 から継続の最重要ルール）。Fable の PMO が
   手を動かし始めるとコストとコンテキストが同時に汚れる。
@@ -51,8 +68,14 @@ haiku → sonnet → opus → fable (jen-deep-solver)
 健全性チェックの基準値。
 
 参考: 単価差込みのコスト内訳（出力寄り加重の概算）は
-sonnet 約67% / opus 約22% / fable 約11%。呼び出し数では少数派の
+sonnet 約57% / opus 約29% / fable 約14%。呼び出し数では少数派の
 opus/fable が、単価の高さでコストシェアを押し上げる形が想定どおり。
+
+> **v3.8.1 で引き直した**: v3.5〜v3.8 は Sonnet 4系（$3/$15）前提で
+> 「sonnet 約67% / opus 約22% / fable 約11%」と記載していた。Sonnet 5 は
+> $2/$10 なので上記へ更新した。**呼び出し比率 20:4:1 は変えていない** —
+> sonnet が相対的に安くなった分、同じ呼び出し構成でもコストが上位層へ
+> 寄っただけである。判断の目安（下記）は呼び出し数ベースなので影響を受けない。
 
 ## Ratio Guard（比率監視）
 
@@ -105,7 +128,7 @@ v3.5では両者を同一視して「opus:fable ≈ 4:1 が健全」と書いて
 2. **`CLAUDE_CODE_SUBAGENT_MODEL` を確認**: この環境変数が設定されていると、
    agents の frontmatter `model:` 指定を上書きし、fable 指定の agent が別モデルで
    静かに動く。`unset CLAUDE_CODE_SUBAGENT_MODEL` するか `inherit` を外す。
-3. **classifier フォールバック**: 高リスク領域に触れるとセッションが Opus 4.8 へ
+3. **classifier フォールバック**: 高リスク領域に触れるとセッションが Opus 5 へ
    ルーティングされ、そのまま Opus で継続することがある。longrun 中にこれを検知したら
    handoff を更新して新セッションで再開する（longrun-playbook 参照）。
 4. **thinking は常時 ON**: Fable 5 は adaptive thinking を無効化できない。

@@ -43,7 +43,7 @@ board.md の進行中テーブルを handoff.md へ転記する。長時間の�
 - Fable 5 は多日規模の自走を想定して設計されている。cycleを止める理由がなければ
   handoff更新→次cycleへ進み続けてよい。
 - ただし委譲規律は維持する: PMO(fable)自身が実装を始めたらそれはdrift。
-- classifierフォールバック検知: セッションがOpus 4.8へ切り替わった通知が出たら、
+- classifierフォールバック検知: セッションがOpus 5へ切り替わった通知が出たら、
   現cycleを完了→handoff更新→新セッション(/model fable)で再開する。
 - コストチェックポイント: 5 cycleごとに「fableで処理した工程のうちsonnet以下へ
   委譲できたものはないか」を1行で自己監査し `.jen/decisions.md` に残す。
