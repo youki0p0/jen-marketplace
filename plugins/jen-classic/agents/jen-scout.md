@@ -34,9 +34,18 @@ v3.7からは「対象コードベースの地図」「Jen自身の構成台帳�
 - マップの形式は references/context-scoping.md 参照。
 
 スキルマップ（v3.7・詳細は references/behavior-audit.md）:
-- `plugins/jen/agents/*.md`・`skills/*/SKILL.md`・`commands/*.md`・
-  `references/*.md` を棚卸しし、`.jen/skillmap.json` に
-  「名前/model/役割1行/参照元ファイル」で記録する。
+- **重要**: 棚卸し対象はこのリポジトリ相対の `plugins/jen/...` ではない。
+  プラグインとしてインストールされた場合、実体は `~/.claude/plugins/cache/...`
+  配下にあり、プロジェクトのcwdからは見えない。まず `Bash: echo $CLAUDE_PLUGIN_ROOT`
+  で自分のプラグインルートを特定し、`$CLAUDE_PLUGIN_ROOT/agents/*.md`・
+  `$CLAUDE_PLUGIN_ROOT/skills/*/SKILL.md`・`$CLAUDE_PLUGIN_ROOT/commands/*.md`・
+  `$CLAUDE_PLUGIN_ROOT/skills/jen/references/*.md` を棚卸しする
+  （このJenプラグイン自身のソースリポジトリを直接編集している時に限り、
+  `plugins/jen/...` のリポジトリ相対パスも有効）。
+- `$CLAUDE_PLUGIN_ROOT` が解決できない場合は棚卸しをスキップし、
+  「プラグインルート未解決のため未実施」と明記する（誤った場所を
+  スキャンして空/誤ったマップを黙って作らない）。
+- 棚卸し結果は `.jen/skillmap.json` に「名前/model/役割1行/参照元ファイル」で記録する。
 - **整合性チェックが主目的**: SKILL.mdのルーティング表に載っていないagentが
   無いか、model-tiering.mdの記載とagentファイルの`model:`が一致しているか、
   「## 参照」に書かれたreferenceファイルが実在するか、を機械的に突き合わせ、

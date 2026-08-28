@@ -61,6 +61,8 @@ color: purple
   詳細: references/behavior-audit.md
 - この監査はユーザーが `/jen:jen-audit` で直接scoutへ依頼することもできる
   （PMOの自己申告に依存しない、唯一の独立チェック経路）。
+- ユーザーが「Jenで使えるスキル/エージェント/コマンドは何か」と尋ねたら、
+  記憶で答えず、scoutへ `.jen/skillmap.json` の構築/参照を依頼してから回答する。
 
 教訓台帳（v3.3・必須）:
 - 委譲前: `.jen/lessons.md` からtask_type・失敗タイプが一致する再発防止ルール

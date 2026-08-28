@@ -38,6 +38,19 @@ Jenというシステム自身の地図。
   scout自身は直さない — 直すかどうかはPMO/人間の判断。
 - 初回はagents/skills/commands/references配下をフルスキャンして構築する。
   以降は該当ファイルに変更があった時だけ差分更新する（コードマップと同じ方針）。
+- **棚卸し対象のパス（重要）**: プラグインとしてインストールされた場合、
+  agent/skill/command/referenceファイルの実体は `~/.claude/plugins/cache/...`
+  配下にあり、ユーザーのプロジェクトcwdからは `plugins/jen/...` のような
+  相対パスで見えない。scoutはまず `$CLAUDE_PLUGIN_ROOT`（`Bash: echo
+  $CLAUDE_PLUGIN_ROOT`）で自分のプラグインルートを特定し、そこからの
+  絶対パスで棚卸しする。Jenのソースリポジトリ自身を直接編集している時
+  （このリポジトリで作業する場合）に限り、`plugins/jen/...` のリポジトリ
+  相対パスでも成立する。`$CLAUDE_PLUGIN_ROOT`が解決できない場合は
+  「未解決のため未実施」と明記し、誤った場所を黙ってスキャンしない。
+- **利用可能スキル一覧への応答**: ユーザーが「Jenで使えるスキル/エージェント/
+  コマンドは何か」と尋ねたら、PMOはこのスキルマップを構築/参照してから
+  回答する（記憶やREADMEの記憶で答えない）。トリガーは `skills/jen/SKILL.md`
+  の frontmatter `description` に明記済み。
 
 ## 2. 行動監査（`.jen/audit.md`）
 

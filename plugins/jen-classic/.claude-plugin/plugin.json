@@ -1,6 +1,6 @@
 {
   "name": "jen-classic",
-  "version": "3.7.0",
+  "version": "3.7.1",
   "description": "Jen v3.2 Classic Edition — same PMO orchestration on Opus 4.8 (no Fable required). Compensates Fable's long-horizon strength with re-anchoring, session rotation, and opus council escalation.",
   "author": {
     "name": "Yuukinosh",

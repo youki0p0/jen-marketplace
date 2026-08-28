@@ -1,5 +1,37 @@
 # Changelog
 
+## v3.7.1 (2026-08-25) — Skill Map パス修正 + 利用可能スキル一覧トリガー（jen / jen-classic 共通）
+
+CLAUDE.mdへの記載でトリガーする案は不採用にした（下記）。代わりに、
+v3.7.0のスキルマップ設計に実際のバグがあったので修正し、正しい
+仕組み（skill descriptionによる自動トリガー）で同等のことを実現した。
+
+### 修正
+- **skillmap.jsonの棚卸しパスが壊れていた**: v3.7.0は
+  `plugins/jen/agents/*.md` のようなJenソースリポジトリ相対のパスを
+  前提にしていたが、実際にプラグインとしてインストールされた場合、
+  実体は `~/.claude/plugins/cache/...` 配下にあり、ユーザーの
+  プロジェクトcwdからは見えない。scoutがまず `$CLAUDE_PLUGIN_ROOT` を
+  解決し、そこからの絶対パスで棚卸しするよう修正。解決できない場合は
+  「未解決のため未実施」と明記し、誤った場所を黙ってスキャンしない
+  （Jenのソースリポジトリ自身を編集する場合はリポジトリ相対パスのままでよい）
+
+### 追加
+- **利用可能スキル一覧への応答**: `skills/jen/SKILL.md` の`description`に
+  「Jenで使えるスキル/エージェント一覧」を尋ねる質問を追記し、そのトリガー
+  でscoutにskillmap.jsonを構築/参照させてから回答する（記憶やREADMEの
+  記憶で答えない）。CLAUDE.mdではなくskillのdescriptionで実装した理由は
+  下記。
+
+### 採用しなかったもの
+- **CLAUDE.mdへの記載**: 当初の依頼どおりCLAUDE.mdを検討したが、
+  公式ドキュメントで「プラグイン自身のCLAUDE.mdはプロジェクトコンテキスト
+  として読み込まれない」と明記されており、かつプラグインが
+  インストール先ユーザーのCLAUDE.mdへ自動的に書き込む仕組みも存在しない
+  （常に人間の手動編集）。「特定の質問でこのagentを起動する」という
+  トリガー制御は公式にはskill/agentの`description` frontmatterの役割
+  であるため、そちらで実装した。
+
 ## v3.7.0 (2026-08-25) — Skill Map & Behavior Audit（jen / jen-classic 共通）
 
 これまでJenには成果物(内容)を監査する担当（verifier/strict-verifier/

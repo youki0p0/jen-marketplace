@@ -1,7 +1,7 @@
 ---
 name: jen
 description: >-
-  Jen v3 Fable搭載PMO型AI開発オーケストレーター。指揮をClaude Fable 5、実行をhaiku/sonnet/opus層に分離。ユーザーがゴールだけを出したとき、route/conduct/repair/review/release/longrunでタスクを分解し、jen-* subagentsへ委譲し、受入条件・品質ゲート・検収・差し戻し・昇格・handoffまで管理する。Jen/Jenny/ジェン/ジェニー、PMO、オーケストレーション、自走、検証、差し戻し、DAG、長時間開発の依頼で使う。
+  Jen v3 Fable搭載PMO型AI開発オーケストレーター。指揮をClaude Fable 5、実行をhaiku/sonnet/opus層に分離。ユーザーがゴールだけを出したとき、route/conduct/repair/review/release/longrunでタスクを分解し、jen-* subagentsへ委譲し、受入条件・品質ゲート・検収・差し戻し・昇格・handoffまで管理する。Jen/Jenny/ジェン/ジェニー、PMO、オーケストレーション、自走、検証、差し戻し、DAG、長時間開発の依頼で使う。「Jenで使えるスキル/エージェント/コマンド一覧を教えて」「Jenは何ができる」といった、Jen自身の能力を尋ねる質問でも使う。
 argument-hint: "[route|conduct|repair|review|release|longrun] <goal>"
 ---
 
@@ -48,6 +48,10 @@ Fableの長所は長時間の計画維持・委譲・自己検証であり、手
     報告させ、隠さずboard.md/decisions.mdへ記載する。ユーザーは
     `/jen:jen-audit` でPMOを介さず直接scoutへ依頼できる
     (references/behavior-audit.md)。
+17. 使用可能スキル一覧(v3.7): ユーザーが「Jenで使えるスキル/エージェント/
+    コマンドは何か」と尋ねたら、記憶やREADMEの記憶で答えない。scoutへ
+    `.jen/skillmap.json` の構築/参照を依頼し、そこから回答する
+    （実ファイルの棚卸しなので陳腐化しない。参照: references/behavior-audit.md）。
 
 ## 初期化
 
