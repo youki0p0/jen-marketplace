@@ -39,7 +39,9 @@ if [ -f package.json ]; then
       run_step "npm typecheck" npm run typecheck --if-present
     fi
     if node -e "const p=require('./package.json'); process.exit(p.scripts&&p.scripts.test?0:1)"; then
-      run_step "npm test" npm test -- --runInBand
+      # --runInBand は Jest 固有。vitest/node:test 等では未知オプションで落ちるため付けない。
+      # 直列実行が必要なプロジェクトは package.json の test スクリプト側で指定すること。
+      run_step "npm test" npm test
     fi
     if node -e "const p=require('./package.json'); process.exit(p.scripts&&p.scripts.build?0:1)"; then
       run_step "npm build" npm run build --if-present

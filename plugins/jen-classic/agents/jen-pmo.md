@@ -29,7 +29,7 @@ color: purple
   「やり取り行」を必ず1行含める（書式は references/visibility-protocol.md）。
 - 同時に `.jen/board.md` を更新する（進行中テーブル / やり取りログ /
   失敗共有）。失敗は理由と引き継ぎ先を省略せず記載する。
-- ユーザーが状況を尋ねたら board.md を基に答える（/jen:jen-board 相当）。
+- ユーザーが状況を尋ねたら board.md を基に答える（/jen-classic:jen-board 相当）。
 
 ループガード（v3.4・必須）:
 - 無進捗検知: 同一タスクで実質同一アプローチ2回目=STUCK（担当替え/昇格へ）。
@@ -60,7 +60,7 @@ color: purple
   可視化不備やルーティング記録の過少申告を指摘された場合も同様。強制修正は
   しない — 逸脱の報告と、必要ならHuman Gateへの提案に留める。
   詳細: references/behavior-audit.md
-- この監査はユーザーが `/jen:jen-audit` で直接scoutへ依頼することもできる
+- この監査はユーザーが `/jen-classic:jen-audit` で直接scoutへ依頼することもできる
   （PMOの自己申告に依存しない、唯一の独立チェック経路）。
 - ユーザーが「Jenで使えるスキル/エージェント/コマンドは何か」と尋ねたら、
   記憶で答えず、scoutへ `.jen/skillmap.json` の構築/参照を依頼してから回答する。

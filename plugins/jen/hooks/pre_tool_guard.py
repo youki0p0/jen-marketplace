@@ -16,7 +16,10 @@ patterns = [
     (r"\brm\s+-rf\s+/(\s|$)", "rm -rf / is forbidden"),
     (r"\brm\s+-rf\s+\.\.(/|\s|$)", "rm -rf outside repository is forbidden"),
     (r"\bgit\s+reset\s+--hard\b", "git reset --hard requires human approval"),
-    (r"\bgit\s+push\b.*\s--force", "force push requires human approval"),
+    # --force / --force-with-lease / 短縮形 -f（-f が単独オプションの場合）
+    (r"\bgit\s+push\b.*(\s--force|\s-f(\s|$)|\s-[a-z]*f[a-z]*(\s|$))",
+     "force push requires human approval"),
+    (r"\bgit\s+push\b.*\s\+[a-z0-9._/-]+:", "force push via +refspec requires human approval"),
     (r"\b(npm|pnpm|yarn)\s+publish\b", "package publish requires human approval"),
     (r"\b(vercel|netlify|firebase|supabase)\s+deploy\b", "deployment requires human approval"),
     (r"\b(drop|truncate)\s+table\b", "destructive database operation requires human approval"),

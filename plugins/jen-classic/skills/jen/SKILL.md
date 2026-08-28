@@ -46,7 +46,7 @@ Classicの核: Fableを使わず、指揮(PMO)を Opus 4.8 に載せる。Fable�
     自己申告ではなくhookの実ログ(`.jen/logs/`)。可視化・ルーティング記録・
     コンテキストスコープ・ループガードへの逸脱を準拠/逸脱/判定不能の3値で
     報告させ、隠さずboard.md/decisions.mdへ記載する。ユーザーは
-    `/jen:jen-audit` でPMOを介さず直接scoutへ依頼できる
+    `/jen-classic:jen-audit` でPMOを介さず直接scoutへ依頼できる
     (references/behavior-audit.md)。
 17. 使用可能スキル一覧(v3.7): ユーザーが「Jenで使えるスキル/エージェント/
     コマンドは何か」と尋ねたら、記憶やREADMEの記憶で答えない。scoutへ
@@ -147,7 +147,7 @@ release-managerがPR本文、検証結果、残リスク、ロールバック、
 - ループガード: `references/loop-guards.md`
 - コンテキストスコープ: `references/context-scoping.md`
 - スキルマップ/行動監査: `references/behavior-audit.md`
-- モデル階層(Fable構成): `references/model-tiering.md`
+- モデル階層(Classic/Opus構成): `references/model-tiering.md`
 - 役割と運用: `references/operating-model.md`
 - routing詳細: `references/routing-policy.md`
 - 受入条件: `references/acceptance-criteria.md`

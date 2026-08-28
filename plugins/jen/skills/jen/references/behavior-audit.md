@@ -3,7 +3,7 @@
 これまでJenには「成果物(内容)を監査する担当」（verifier / strict-verifier /
 security-reviewer / contrarian-reviewer / ux-critic）はいたが、
 「PMOが実際に何をしたか(行動)を監査する担当」がいなかった。
-Ratio Guard・ループガード・可視化プロトコルの自己点検は、すべて
+Ratio Guard（Fable版のみ）・ループガード・可視化プロトコルの自己点検は、すべて
 **PMO自身の自己申告**（`.jen/routing-stats.json`・`.jen/board.md`・
 `.jen/decisions.md`）に依存しており、独立した第三者チェックが無かった。
 
@@ -22,7 +22,7 @@ Jenというシステム自身の地図。
   },
   "skills": { "jen": "PMO本体", "jen-longrun": "長時間自走" },
   "commands": { "jen-status": "状態表示", "jen-board": "ワークボード表示" },
-  "references": { "model-tiering.md": "モデル階層とRatio Guard" },
+  "references": { "model-tiering.md": "モデル階層（Fable版はRatio Guardも）" },
   "issues": [
     "例: SKILL.mdのルーティング表にjen-xxxが記載されていない",
     "例: model-tiering.mdはjen-architectをopusと記載しているが、
@@ -36,17 +36,29 @@ Jenというシステム自身の地図。
   参照ドキュメントの記載のズレ、ルーティング表の記載漏れ、存在しない
   referenceファイルへのリンクなど）を機械的に突き合わせて`issues`へ列挙する。
   scout自身は直さない — 直すかどうかはPMO/人間の判断。
+- **必ず見る既知のドリフト源**（v3.7.2で追加。過去に実際にズレた箇所）:
+  1. `skills/jen/SKILL.md`（メインセッション=PMOとして振る舞う指示）と
+     `agents/jen-pmo.md`（subagent版PMO）は**同じ規律を二重に定義**している。
+     可視化/ループガード/教訓台帳/コンテキストスコープ/行動監査の各節が
+     両方に存在し、手動同期が必要。**両者の記述が矛盾していないか**を確認する。
+  2. `references/model-tiering.md` のモデル表と、各 `agents/*.md` の
+     `model:` frontmatter の一致。
+  3. コマンド参照の名前空間（Fable版は `/jen:`、Classicは `/jen-classic:`）が
+     そのエディションのファイルで正しいか。
+  4. `agents/*.md` に登場する全agentが SKILL.md のルーティング表に載っているか
+     （`jen-pmo` はメインセッションが担うため委譲先ではない、が既知の例外）。
 - 初回はagents/skills/commands/references配下をフルスキャンして構築する。
   以降は該当ファイルに変更があった時だけ差分更新する（コードマップと同じ方針）。
 - **棚卸し対象のパス（重要）**: プラグインとしてインストールされた場合、
   agent/skill/command/referenceファイルの実体は `~/.claude/plugins/cache/...`
-  配下にあり、ユーザーのプロジェクトcwdからは `plugins/jen/...` のような
-  相対パスで見えない。scoutはまず `$CLAUDE_PLUGIN_ROOT`（`Bash: echo
-  $CLAUDE_PLUGIN_ROOT`）で自分のプラグインルートを特定し、そこからの
-  絶対パスで棚卸しする。Jenのソースリポジトリ自身を直接編集している時
-  （このリポジトリで作業する場合）に限り、`plugins/jen/...` のリポジトリ
-  相対パスでも成立する。`$CLAUDE_PLUGIN_ROOT`が解決できない場合は
-  「未解決のため未実施」と明記し、誤った場所を黙ってスキャンしない。
+  配下にあり、ユーザーのプロジェクトcwdからは `plugins/<plugin>/...` のような
+  相対パスでは見えない。**scoutはBashを持たないread-only agentなので
+  `$CLAUDE_PLUGIN_ROOT` を自分で解決できない** — 依頼元（PMO、または
+  jen-audit実行時のメインセッション）が `echo $CLAUDE_PLUGIN_ROOT` で
+  解決した絶対パスを委譲promptに含める。渡されなかった場合、scoutは
+  Jenのソースリポジトリ自身を編集している時に限り `plugins/<plugin>/...` の
+  相対パスを試し、それも無ければ「未指定のため未実施」と明記して、
+  誤った場所を黙ってスキャンしない。
 - **利用可能スキル一覧への応答**: ユーザーが「Jenで使えるスキル/エージェント/
   コマンドは何か」と尋ねたら、PMOはこのスキルマップを構築/参照してから
   回答する（記憶やREADMEの記憶で答えない）。トリガーは `skills/jen/SKILL.md`
@@ -77,7 +89,7 @@ Jenというシステム自身の地図。
 | 観点 | 実ログ側 | 自己申告側 | 逸脱の意味 |
 |---|---|---|---|
 | 可視化コンプライアンス | tool-events.jsonl中のTask委譲件数 | board.mdのやり取り行件数 | 委譲したのにユーザーへ非表示にした（沈黙） |
-| Ratio Guard整合性 | tool-events.jsonlから読み取れるagent別呼出回数 | routing-stats.jsonの記録件数 | 昇格の記録漏れ・過少申告 |
+| ルーティング記録の整合性 | tool-events.jsonlから読み取れるagent別委譲回数 | routing-stats.jsonの記録件数 | 昇格・委譲の記録漏れ／過少申告（Ratio Guardを持つのはFable版のみ。Classicではルーティング記録の網羅性だけを見る） |
 | コンテキストスコープ遵守 | 委譲promptの内容（取得できれば） | — | 「全部読んで」的な指示が残っていないか |
 | ループガード遵守 | 同一task_idへの近似委譲の反復回数 | board.md上のSTUCK/昇格記録 | ブレーカーが機能せず同じ手を繰り返していないか |
 
@@ -92,8 +104,8 @@ Jenというシステム自身の地図。
 - **強制停止はしない**（v3.4/v3.5/v3.6と同じ理由）。監査は自己点検の一部。
   重大な逸脱（可視化の意図的な隠蔽が疑われる等）はHuman Gate相当として報告する。
 - **監査は誰が起動しても良い**。longrunのcheckpoint毎にPMOが依頼するのに
-  加えて、`/jen:jen-audit` でユーザーが直接scoutへ依頼できる。
-  PMOの自己申告に依存する他の自己点検（Ratio Guard等）と違い、
+  加えて、`jen-audit` コマンド（Fable版 `/jen:jen-audit` / Classic `/jen-classic:jen-audit`）でユーザーが直接scoutへ依頼できる。
+  PMOの自己申告に依存する他の自己点検（ルーティング学習・Ratio Guard等）と違い、
   ユーザー自身が独立に叩けることが、この監査の一番の価値。
 - scoutは監査結果を直さない・忖度しない。見つけた不一致をそのまま書く。
 
@@ -104,4 +116,4 @@ Jenというシステム自身の地図。
 - 監査対象のログ自体（tool-events.jsonl）の記録漏れ・スキーマ不明を
   scoutが検知することはできない（hookの実装依存）。
 - PMOがcheckpoint毎の監査依頼自体をサボった場合、それを検知する仕組みは
-  ない。ユーザーが`/jen:jen-audit`を直接叩くのが、それに対する唯一の対抗策。
+  ない。ユーザーが `jen-audit` コマンドを直接叩くのが、それに対する唯一の対抗策。

@@ -2,11 +2,15 @@
 description: Run an independent behavior audit — check what Jen actually did (from hook-recorded logs) against what it self-reported.
 ---
 
-jen-scoutへ以下を依頼する（PMOを経由せず直接でよい。これがPMOの自己申告に
-依存しない唯一の独立チェック経路）:
+まず `echo $CLAUDE_PLUGIN_ROOT` を実行してプラグインルートの絶対パスを解決し、
+それをscoutへの依頼promptに必ず含めること（scoutはBashを持たないため自分では
+解決できない。空だった場合はその旨を伝え、リポジトリ相対の探索を許可する）。
 
-1. `.jen/skillmap.json` を構築/更新し、agents/skills/commands/referencesの
-   整合性チェック結果（`issues`）を表示する。
+そのうえで jen-scout へ以下を依頼する（PMOを経由せず直接でよい。これがPMOの
+自己申告に依存しない唯一の独立チェック経路）:
+
+1. 渡したプラグインルート配下を棚卸しして `.jen/skillmap.json` を構築/更新し、
+   agents/skills/commands/referencesの整合性チェック結果（`issues`）を表示する。
 2. `.jen/logs/tool-events.jsonl` と `.jen/logs/stop-events.jsonl`（hookが
    機械的に記録した実ログ）を、`.jen/board.md` / `.jen/routing-stats.json` /
    `.jen/decisions.md`（PMOの自己申告）と突き合わせ、`.jen/audit.md` を作成/更新する。

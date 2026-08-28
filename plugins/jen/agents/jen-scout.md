@@ -34,17 +34,19 @@ v3.7からは「対象コードベースの地図」「Jen自身の構成台帳�
 - マップの形式は references/context-scoping.md 参照。
 
 スキルマップ（v3.7・詳細は references/behavior-audit.md）:
-- **重要**: 棚卸し対象はこのリポジトリ相対の `plugins/jen/...` ではない。
-  プラグインとしてインストールされた場合、実体は `~/.claude/plugins/cache/...`
-  配下にあり、プロジェクトのcwdからは見えない。まず `Bash: echo $CLAUDE_PLUGIN_ROOT`
-  で自分のプラグインルートを特定し、`$CLAUDE_PLUGIN_ROOT/agents/*.md`・
-  `$CLAUDE_PLUGIN_ROOT/skills/*/SKILL.md`・`$CLAUDE_PLUGIN_ROOT/commands/*.md`・
-  `$CLAUDE_PLUGIN_ROOT/skills/jen/references/*.md` を棚卸しする
-  （このJenプラグイン自身のソースリポジトリを直接編集している時に限り、
-  `plugins/jen/...` のリポジトリ相対パスも有効）。
-- `$CLAUDE_PLUGIN_ROOT` が解決できない場合は棚卸しをスキップし、
-  「プラグインルート未解決のため未実施」と明記する（誤った場所を
-  スキャンして空/誤ったマップを黙って作らない）。
+- **棚卸し対象のパスは依頼元から受け取る**: あなたはBashを持たないread-only
+  agentなので、環境変数 `$CLAUDE_PLUGIN_ROOT` を自分では解決できない。
+  プラグインルートの絶対パスは、依頼元（PMO、または jen-audit 実行時の
+  メインセッション）が解決して委譲promptに含める約束になっている。
+- 受け取ったルート配下の `agents/*.md`・`skills/*/SKILL.md`・`commands/*.md`・
+  `skills/jen/references/*.md` を棚卸しする。
+  （プラグインとしてインストールされている場合、実体は
+  `~/.claude/plugins/cache/...` 配下にあり、プロジェクトのcwdからは
+  `plugins/jen/...` のような相対パスでは**見えない**。）
+- ルートを渡されなかった場合: Jen自身のソースリポジトリで作業しているなら
+  `plugins/jen/...`（Classicなら `plugins/jen-classic/...`）を試してよい。
+  それも存在しなければ棚卸しをスキップし「プラグインルート未指定のため未実施」
+  と明記する（誤った場所をスキャンして空/誤ったマップを黙って作らない）。
 - 棚卸し結果は `.jen/skillmap.json` に「名前/model/役割1行/参照元ファイル」で記録する。
 - **整合性チェックが主目的**: SKILL.mdのルーティング表に載っていないagentが
   無いか、model-tiering.mdの記載とagentファイルの`model:`が一致しているか、

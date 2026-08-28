@@ -1,6 +1,61 @@
 # Changelog
 
-## v3.7.1 (2026-08-25) — Skill Map パス修正 + 利用可能スキル一覧トリガー（jen / jen-classic 共通）
+## v3.7.2 (2026-08-28) — 全体監査による修正（jen / jen-classic 共通）
+
+多角的な棚卸しで見つかった20件を修正。うち2件はv3.7.0/v3.7.1で作り込んだ自傷バグ。
+
+### 🔴 実行を壊していたバグ
+- **scoutにBash権限が無いのに `echo $CLAUDE_PLUGIN_ROOT` を指示していた**
+  （v3.7.1の自傷）: scoutの`tools:`は Read/Write/Edit/Grep/Glob。skillmap機能は
+  起動時点で失敗していた。→ **依頼元（PMO / jen-auditコマンド）がプラグインルートを
+  解決してpromptで渡す**方式に変更（scoutをread-onlyのまま保つ）
+- **jen-classic のコマンド名前空間が全て `/jen:`** だった（正しくは `/jen-classic:`）。
+  Classic利用者が叩いても存在しないコマンドを案内していた。6箇所修正
+
+### 🟠 記述が事実と異なっていた
+- `plugins/jen-classic/README.md` が Fable版のコピーで「jen-pmo は model: fable」と
+  記載（実際は opus）。Classic の存在意義と正反対だったため全面改訂
+- jen-classic の `plugin.json` keywords に `fable` が残存 → `no-fable` へ（marketplace.json と整合）
+- jen-classic の `jen-deep-solver.md` が昇格ラダーを「→ **fable**」と記載 → 「→ **opus合議**」
+- jen-classic の SKILL.md 参照ラベルが「モデル階層(Fable構成)」→「(Classic/Opus構成)」
+- 共通化した `behavior-audit.md` が、Classicに存在しないRatio Guardを監査軸にしていた
+  → エディション中立な「ルーティング記録の整合性」に変更
+- `plugins/jen/README.md` のコマンド一覧が3本のまま（実際は5本、jen-board/jen-audit欠落）
+- marketplace.json の jen 説明に commands 本数を追記
+- CHANGELOG の見出し4重複（v3.3.0 / v3.2.0-classic / v3.2.0 / v3.1.0）を解消
+- v3.6.0〜v3.7.1 の日付が実際のコミット日とずれていた（08-25 → 08-28）
+
+### 🟡 設計上の欠陥（分析の誤り）
+- **Ratio Guard の測定定義が目標定義と食い違っていた**: `routing-stats.json` は
+  1タスク完了につき委譲**先**のmodelを1行記録する。PMO(fable)は委譲**元**なので
+  記録されず、統計上の`fable`は実質 deep-solver のみ。にもかかわらず
+  v3.5は「PMOを含む全体比率20:4:1」と同一視し「opus:fable ≈ 4:1 が健全」と記載していた。
+  委譲先ベースで4:1は「opusタスク4件に1件deep-solver発火」＝最終手段の常用という
+  異常事態を意味する。→ 測定できるもの/できないものを明記し、閾値を
+  **10:1未満=要注意 / 4:1未満=異常**へ訂正。`jen_status.py` も同期
+- **agent frontmatter の `effort`/`memory`/`isolation`/`color` はサポート未検証**である旨を明記。
+  無視されている場合 `isolation: worktree`（6 agents）は分離しておらず、
+  **分離を前提にした安全設計をしないこと**を注意書きとして追加
+
+### 🟢 安全性・移植性
+- **`.jen/logs/` への平文ログによるsecret露出リスクをREADMEに明記**。
+  `post_tool_log.py` は全ツールペイロードをそのまま追記するが、プラグインは
+  利用者の`.gitignore`を書き換えない。「同梱」という誤解を招く記述を訂正し、
+  `echo '.jen/' >> .gitignore` を導入直後の必須手順として明示
+- **force pushガードの穴を塞いだ**: `git push -f`（短縮形）、`-uf` 等の
+  フラグ結合、`+refspec` 形式が素通りしていた。誤検知テスト（`-u`, `--tags` 等）も実施
+- `jen_quality_gate.sh` の `npm test -- --runInBand` は Jest 固有で
+  vitest等では失敗するため除去
+- テンプレ名 `routing-stats.jsonl.example` → `routing-stats.json.example`
+  （実行時ファイル名 `.jen/routing-stats.json` と統一）
+
+### 検出可能にした既知の設計課題（構造変更は保留）
+- `skills/jen/SKILL.md` と `agents/jen-pmo.md` が**同じPMO規律を二重定義**しており
+  手動同期が必要（実際にドリフト実績あり）。統合するかは設計判断のため保留し、
+  スキルマップ整合性チェックの「必ず見る既知のドリフト源」に登録して
+  検出できるようにした
+
+## v3.7.1 (2026-08-28) — Skill Map パス修正 + 利用可能スキル一覧トリガー（jen / jen-classic 共通）
 
 CLAUDE.mdへの記載でトリガーする案は不採用にした（下記）。代わりに、
 v3.7.0のスキルマップ設計に実際のバグがあったので修正し、正しい
@@ -32,7 +87,7 @@ v3.7.0のスキルマップ設計に実際のバグがあったので修正し�
   トリガー制御は公式にはskill/agentの`description` frontmatterの役割
   であるため、そちらで実装した。
 
-## v3.7.0 (2026-08-25) — Skill Map & Behavior Audit（jen / jen-classic 共通）
+## v3.7.0 (2026-08-28) — Skill Map & Behavior Audit（jen / jen-classic 共通）
 
 これまでJenには成果物(内容)を監査する担当（verifier/strict-verifier/
 security-reviewer等）はいたが、PMOの行動そのものを監査する担当がいなかった。
@@ -64,7 +119,7 @@ Ratio Guard・ループガード・可視化プロトコルの自己点検はす
   はClaude Codeハーネス依存であり独自検証していない。取得できた範囲でのみ
   判定する旨をbehavior-audit.mdに明記した
 
-## v3.6.0 (2026-08-25) — Context Scoping（jen / jen-classic 共通）
+## v3.6.0 (2026-08-28) — Context Scoping（jen / jen-classic 共通）
 
 [NanoNets/Graft](https://github.com/NanoNets/Graft)（SWE-bench Verified で
 resolve率 54%→66%＋ツール呼出/トークン/時間を削減したと報告されている、
@@ -136,7 +191,6 @@ plan churn、コンテキスト衛生、graceful failure）から、Jen未実装
 - 数値ベースのbudget hard-stop自動化 — hooksでの強制はトークン計測が
   プラグインからは不正確になりやすい。台帳ベースの回数上限で代替
 
-## v3.3.0
 ## v3.3.0 (2026-07-06) — 教訓台帳（過ちを繰り返さない）
 
 ### 追加（jen / jen-classic 共通）
@@ -150,7 +204,6 @@ plan churn、コンテキスト衛生、graceful failure）から、Jen未実装
 - repair / deep-solver に教訓記載を義務化。根本原因未特定のまま閉じることを禁止
 - board.md の解決済み失敗に教訓ID（L-xxx）を紐づけ
 
-## v3.2.0-classic
 ## v3.2.0-classic (2026-07-06) — Classic Edition 追加
 
 Fableを使わない `jen-classic` プラグインを同梱（機能はv3.2.0と同一、モデル階層のみ変更）。
@@ -165,7 +218,6 @@ Fableを使わない `jen-classic` プラグインを同梱（機能はv3.2.0と
 - コスト: Opusは Fableの約半額のため、合議（opus×3）でもfable単独昇格と同水準
 - ⚠️ jen と jen-classic は agent名が同一のため**同時有効化禁止**
 
-## v3.2.0
 ## v3.2.0 (2026-07-05) — 可視化プロトコル
 
 「誰が・何を・失敗はどう引き継がれたか」をユーザーに見せる。
@@ -180,7 +232,6 @@ Fableを使わない `jen-classic` プラグインを同梱（機能はv3.2.0と
 - **規律**: 沈黙禁止（イベント発生順に表示）/ 隠蔽禁止（失敗を薄めない）/
   冗長禁止（やり取り行は1行、詳細はboard.mdへ）
 
-## v3.1.0
 ## v3.1.0 (2026-07-05) — 自己改善ループ
 
 SNSで共有されていた自己改善型エージェント設計の知見から、Jenの設計思想

@@ -116,7 +116,25 @@ Acceptance Criteria:
 - **外部通信なし** — hooks / scripts に curl・fetch・外部送信は一切ありません（[hooks/](plugins/jen/hooks/) は40行程度の Python なので目視できます）
 - **hooks がやること** — `pre_tool_guard.py`（`rm -rf /`・force push・publish・deploy・DROP TABLE 等を**ブロックする側**）、`post_tool_log.py` / `stop_append_summary.py`（`.jen/logs/` へのローカル JSONL 追記のみ）
 - **secret を要求しない** — APIキー・トークン入力を求める箇所はありません
-- **書き込み先** — リポジトリ内の `.jen/`（状態・ログ）のみ。`.gitignore` 推奨エントリは同梱
+- **書き込み先** — 作業中のリポジトリ内の `.jen/`（状態・ログ）のみ
+
+### ⚠️ 導入したら最初にやること: `.jen/` を gitignore する
+
+`post_tool_log.py` は **PostToolUse フックとして全ツール呼び出しのペイロードを
+そのまま `.jen/logs/tool-events.jsonl` へ平文追記します**。実行した Bash コマンド、
+読み書きしたファイル内容の断片などが含まれ得るため、内容によっては
+**secret がログに載る可能性があります**。プラグインは利用者のプロジェクトの
+`.gitignore` を書き換えないので、各自で追加してください：
+
+```bash
+echo '.jen/' >> .gitignore
+```
+
+（このマーケットプレイスの `.gitignore` に `.jen/` が入っているのは、
+このリポジトリ自身のためのものです。インストール先には配られません。）
+
+ログを残したくない場合は、インストール後に `hooks` から `post_tool_log.py` の
+エントリを外してください（行動監査 `/jen:jen-audit` の材料は失われます）。
 
 ## 構成
 

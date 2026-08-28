@@ -56,20 +56,39 @@ opus/fable が、単価の高さでコストシェアを押し上げる形が想
 
 ## Ratio Guard（比率監視）
 
-自己改善ループ（v3.1）が書く `.jen/routing-stats.json` から実測比率を出し、
-目標分布からの乖離を検知する。強制停止はしない（v3.4の不変条件どおり、
-数値によるhard-stop自動化はしない）。PMOへの自己点検シグナルとして扱う。
+自己改善ループ（v3.1）が書く `.jen/routing-stats.json` から実測比率を出す。
+強制停止はしない（v3.4の不変条件どおり、数値によるhard-stop自動化はしない）。
+PMOへの自己点検シグナルとして扱う。
 
-- `/jen:jen-status` が `.jen/routing-stats.json` を集計し
-  `sonnet:opus:fable` の実測比率を表示する（`jen_status.py` 参照）。
-- **sonnet:opus の目安は 5:1**。3:1を下回ったら
-  「本来sonnetで済む案件をopusへ昇格しすぎていないか」をPMOが点検し、
-  REJECT基準（2回で昇格）を守れているか確認する。8:1を上回るのは
-  単に難所が少なかっただけで悪い兆候ではない。
-- **opus:fable の目安は 4:1**。2:1を下回ったら
-  「deep-solverが多発していないか」「classifierフォールバックでopus層が
-  fable相当のコストを静かに食っていないか」（運用上の注意 #3参照）を
-  PMOが点検し、`.jen/decisions.md` に一行残す。
+### ⚠️ 測定できるものと、できないもの（v3.7.2で訂正）
+
+`routing-stats.json` は**1タスク完了につき1行**、その**委譲先agentのmodel**を
+記録する。したがって:
+
+- **PMO(fable)は行にならない** — PMOは委譲「元」であり委譲先ではないため。
+- よって統計上の `fable` 行は実質 **deep-solver のみ**。
+- つまりこの統計は上記「目標分布」（指揮を含む全体の呼び出し比率）を
+  **測っていない**。測れるのは「**委譲先の分布**」だけである。
+
+v3.5では両者を同一視して「opus:fable ≈ 4:1 が健全」と書いていたが、これは誤り。
+委譲先ベースで opus:fable = 4:1 は「opusタスク4件につき1件deep-solverが発火」
+＝最終手段が常用されている異常事態を意味する。以下に訂正する。
+
+### 判断の目安（委譲先ベース）
+
+- `/jen:jen-status` が `.jen/routing-stats.json` を集計して表示する
+  （`jen_status.py` 参照）。
+- **sonnet:opus の目安は 5:1**（目標分布と整合する唯一の指標）。
+  3:1を下回ったら「本来sonnetで済む案件をopusへ昇格しすぎていないか」を
+  点検し、REJECT基準（2回で昇格）を守れているか確認する。
+  8:1を上回るのは単に難所が少なかっただけで悪い兆候ではない。
+- **deep-solver(fable)は「稀であるほど健全」**。目標値は設けない。
+  opus:fable が **10:1 を下回ったら要注意、4:1 を下回ったら異常**として
+  「opus層がなぜ繰り返し失敗しているか」「classifierフォールバックで
+  opus層がfable相当のコストを静かに食っていないか」（運用上の注意 #3）を
+  点検し、`.jen/decisions.md` に一行残す。
+- **指揮側(PMO/fable)の消費は本統計では測れない**。知りたい場合は
+  Claude Code側の使用量表示など、Jenの外側の手段で確認すること。
 - longrun の checkpoint 毎、または conduct/route で20タスク処理毎に
   自己点検する（routing-policy.md参照）。
 
@@ -85,6 +104,14 @@ opus/fable が、単価の高さでコストシェアを押し上げる形が想
    handoff を更新して新セッションで再開する（longrun-playbook 参照）。
 4. **thinking は常時 ON**: Fable 5 は adaptive thinking を無効化できない。
    effort で調整する（PMO / deep-solver は max、それ以外は agent 定義に従う）。
+5. **agent frontmatter の一部キーはサポート未検証（v3.7.2で明記）**:
+   agentファイルで使っている `model` / `tools` / `name` / `description` は
+   公式にサポートされているが、`effort` / `memory` / `isolation` / `color` が
+   Claude Codeハーネスに実際に解釈されるかはJen側で検証していない。
+   無視されている場合、`isolation: worktree`（6 agents）はワークツリー分離を
+   しておらず、`effort: max` も効いていない可能性がある。
+   **分離を前提にした安全設計（並列実行で同じファイルを触る等）はしないこと** —
+   並列化の可否は routing-policy.md の条件で判断する。
 
 ## nested subagents
 
