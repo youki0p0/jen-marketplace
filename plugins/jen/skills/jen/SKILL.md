@@ -38,6 +38,10 @@ Fableの長所は長時間の計画維持・委譲・自己検証であり、手
 14. 自己改善ループ(v3.1): routing-stats記録と参照、REJECT失敗タイプのタグ付け、
     checkpoint毎のdrift自己評価、スキル候補の提案(承認は人間)。統計と自己評価は
     参考情報であり、昇格ラダー・Human Gate・ACCEPT/REJECT二値検収を上書きしない。
+15. コンテキストスコープ(v3.6): コード読み書き/検収系への委譲前は、scoutで
+    `.jen/codemap.json` を参照/構築しローカライズしてから対象ファイルのみ渡す
+    (「全部読んで」と指示しない)。変更後はscoutに差分更新させる
+    (references/context-scoping.md)。
 
 ## 初期化
 
@@ -56,6 +60,7 @@ mkdir -p .jen/logs .jen/reports .jen/checkpoints
 - `.jen/verification.md`
 - `.jen/ideas.md`
 - `.jen/handoff.md`
+- `.jen/codemap.json`（v3.6、scoutが構築/差分更新。references/context-scoping.md）
 
 ## モード
 
@@ -128,6 +133,7 @@ release-managerがPR本文、検証結果、残リスク、ロールバック、
 - 可視化プロトコル: `references/visibility-protocol.md`
 - 教訓台帳: `references/lessons-protocol.md`
 - ループガード: `references/loop-guards.md`
+- コンテキストスコープ: `references/context-scoping.md`
 - モデル階層(Fable構成): `references/model-tiering.md`
 - 役割と運用: `references/operating-model.md`
 - routing詳細: `references/routing-policy.md`

@@ -1,5 +1,33 @@
 # Changelog
 
+## v3.6.0 (2026-08-25) — Context Scoping（jen / jen-classic 共通）
+
+[NanoNets/Graft](https://github.com/NanoNets/Graft)（SWE-bench Verified で
+resolve率 54%→66%＋ツール呼出/トークン/時間を削減したと報告されている、
+「毎回リポジトリを読み直す代わりに永続コードマップを差分更新して使い回す」
+手法）にヒントを得て、jen-scout(haiku)の役割を拡張した。
+
+### 追加（jen / jen-classic 共通）
+- **永続コードマップ `.jen/codemap.json`**: ファイル→役割/主要シンボル/
+  依存関係の軽量マップ。scoutが初回はフルスキャンで構築し、以降は
+  変更されたファイルとその隣接ノードだけ差分更新する（全体再構築はしない）
+- **委譲前のローカライズ必須化**: コードを読み書き/検収する担当
+  （builder/frontend/test/architect/debugger/verifier/strict-verifier/
+  security-reviewer/ux-critic）への委譲前に、scoutがcodemapを参照して
+  対象ファイルを絞り込み、その結果のみを委譲promptへ渡す
+  （「リポジトリ全体を読んで」と指示しない）
+- **エスケープハッチ**: 委譲先がスコープ不足を発見したら自分で拡張してよい
+  （ループガードの空転検知の対象外）。作業後はscoutが差分更新する
+- 新規リファレンス: `references/context-scoping.md`
+
+### 採用しなかったもの
+- Graft自身の実測値（-42%トークン/-60%時間/+12pt正解率）をJenの成果として
+  そのまま謳うこと — Graft自体の計測値であり、Jenのマルチエージェント構成
+  への移植効果は独自に検証していないため、`context-scoping.md`に
+  「効果不明な部分」として正直に明記するに留めた
+- codemapの鮮度を数値で強制すること — v3.4/v3.5と同じ理由で、
+  hard-stop自動化はせずエスケープハッチでの自己修復に委ねる
+
 ## v3.5.0 (2026-07-08) — Ratio Guard（jenのみ、jen-classicは対象外）
 
 手動運用で観測された呼び出し比率 sonnet:opus:fable ≈ 20:4:1 を、

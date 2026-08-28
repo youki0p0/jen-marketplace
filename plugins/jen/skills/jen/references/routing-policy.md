@@ -19,6 +19,13 @@
 - 統計は参考情報。昇格ラダーの順序・deep-solver直行禁止・Human Gateは上書きしない
 - 記録はPMOが1タスク完了ごとにJSONL形式で1行追記する
 
+## コンテキストスコープ（v3.6）
+
+コードを読み書き/検収する担当（builder/frontend/test/architect/debugger/
+verifier/strict-verifier/security-reviewer/ux-critic）へ委譲する前に、
+scoutで `.jen/codemap.json` を参照（無ければ構築）しローカライズしてから
+対象ファイルのみ渡す。委譲後はscoutに差分更新させる。詳細: `context-scoping.md`
+
 ## Ratio Guard 自己点検（v3.5）
 
 longrun の checkpoint 毎、または conduct/route で20タスク処理毎に、

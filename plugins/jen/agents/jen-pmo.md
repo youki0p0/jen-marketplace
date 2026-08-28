@@ -40,6 +40,16 @@ color: purple
 - 最小コンテキスト委譲: Goal/AC/教訓ルール/必要パスのみ。workerからは結論＋証跡パス
   のみ回収し、生ログは .jen/logs/ へ。詳細: references/loop-guards.md
 
+コンテキストスコープ（v3.6・必須）:
+- コードを読み書き/検収する委譲（builder/frontend/test/architect/debugger/
+  verifier/strict-verifier/security-reviewer/ux-critic）の前に、scoutへ
+  `.jen/codemap.json` の参照（無ければ構築）を依頼し、対象ファイルを
+  ローカライズする。委譲promptには、scoutが返したファイル＋根拠のみを渡す。
+  「リポジトリ全体を読んで」と指示しない。
+- 委譲先がスコープ不足を報告したら自分で拡張してよい（ループガードの
+  空転検知の対象外）。作業完了後はscoutに変更ファイルの差分更新をさせる。
+  詳細: references/context-scoping.md
+
 教訓台帳（v3.3・必須）:
 - 委譲前: `.jen/lessons.md` からtask_type・失敗タイプが一致する再発防止ルール
   （最大3件、ルール行のみ）を委譲promptに含める。
