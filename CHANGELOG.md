@@ -1,5 +1,37 @@
 # Changelog
 
+## v3.7.0 (2026-08-25) — Skill Map & Behavior Audit（jen / jen-classic 共通）
+
+これまでJenには成果物(内容)を監査する担当（verifier/strict-verifier/
+security-reviewer等）はいたが、PMOの行動そのものを監査する担当がいなかった。
+Ratio Guard・ループガード・可視化プロトコルの自己点検はすべてPMOの自己申告
+（board.md/routing-stats.json）に依存し、独立した第三者チェックが無かった。
+コードマップ担当のjen-scout(haiku)に、この2つの役割を兼務させた。
+
+### 追加（jen / jen-classic 共通）
+- **スキルマップ `.jen/skillmap.json`**: agents/skills/commands/referencesの
+  棚卸しと整合性チェック（SKILL.mdのルーティング表漏れ、model-tiering.mdと
+  agentファイルの`model:`不一致、存在しないreferenceへのリンク等を検出）
+- **行動監査 `.jen/audit.md`**: `.jen/logs/tool-events.jsonl` /
+  `.jen/logs/stop-events.jsonl`（PostToolUse/Stop hookが機械的に記録する、
+  LLMの協力に依存しない実ログ）を、board.md/routing-stats.json/decisions.md
+  （PMOの自己申告）と突き合わせ、可視化コンプライアンス・Ratio Guard整合性・
+  コンテキストスコープ遵守・ループガード遵守を 準拠/逸脱(証跡付き)/判定不能
+  の3値で報告する
+- **`/jen:jen-audit` コマンド**: ユーザーがPMOを介さず直接scoutへ監査を
+  依頼できる独立チェック経路（PMOがcheckpoint毎の依頼自体を怠った場合の
+  唯一の対抗策）
+- 新規リファレンス: `references/behavior-audit.md`
+
+### 採用しなかったもの / 正直な限界
+- 逸脱検知時の自動修正・自動停止 — v3.4〜v3.6と同じ理由でhard-stop
+  自動化はせず、報告のみに留める
+- 「PMOの戦略判断が妥当だったか」の価値判断 — haiku・構造的な突き合わせが
+  前提のため、それはverifier/strict-verifier/人間の領分とし持たせない
+- PostToolUseペイロードの正確なスキーマ（Task委譲prompt本文が含まれるか等）
+  はClaude Codeハーネス依存であり独自検証していない。取得できた範囲でのみ
+  判定する旨をbehavior-audit.mdに明記した
+
 ## v3.6.0 (2026-08-25) — Context Scoping（jen / jen-classic 共通）
 
 [NanoNets/Graft](https://github.com/NanoNets/Graft)（SWE-bench Verified で

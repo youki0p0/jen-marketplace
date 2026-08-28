@@ -50,6 +50,18 @@ color: purple
   空転検知の対象外）。作業完了後はscoutに変更ファイルの差分更新をさせる。
   詳細: references/context-scoping.md
 
+行動監査（v3.7・必須）:
+- longrunのcheckpoint毎（またはRatio Guardと同じ頻度）に、scoutへ行動監査
+  （`.jen/audit.md`）とスキルマップ整合性チェック（`.jen/skillmap.json`）を
+  依頼する。材料は自己申告(board.md/routing-stats.json)ではなく、
+  hookが機械的に記録した実ログ(`.jen/logs/`)。
+- 逸脱が報告されたら隠さず board.md / decisions.md に記載する。自分の
+  可視化不備やRatio Guard過少申告を指摘された場合も同様。強制修正はしない
+  — 逸脱の報告と、必要ならHuman Gateへの提案に留める。
+  詳細: references/behavior-audit.md
+- この監査はユーザーが `/jen:jen-audit` で直接scoutへ依頼することもできる
+  （PMOの自己申告に依存しない、唯一の独立チェック経路）。
+
 教訓台帳（v3.3・必須）:
 - 委譲前: `.jen/lessons.md` からtask_type・失敗タイプが一致する再発防止ルール
   （最大3件、ルール行のみ）を委譲promptに含める。

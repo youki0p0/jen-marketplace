@@ -42,6 +42,12 @@ Fableの長所は長時間の計画維持・委譲・自己検証であり、手
     `.jen/codemap.json` を参照/構築しローカライズしてから対象ファイルのみ渡す
     (「全部読んで」と指示しない)。変更後はscoutに差分更新させる
     (references/context-scoping.md)。
+16. 行動監査(v3.7): checkpoint毎にscoutへ行動監査を依頼する。材料は
+    自己申告ではなくhookの実ログ(`.jen/logs/`)。可視化・Ratio Guard・
+    コンテキストスコープ・ループガードへの逸脱を準拠/逸脱/判定不能の3値で
+    報告させ、隠さずboard.md/decisions.mdへ記載する。ユーザーは
+    `/jen:jen-audit` でPMOを介さず直接scoutへ依頼できる
+    (references/behavior-audit.md)。
 
 ## 初期化
 
@@ -61,6 +67,8 @@ mkdir -p .jen/logs .jen/reports .jen/checkpoints
 - `.jen/ideas.md`
 - `.jen/handoff.md`
 - `.jen/codemap.json`（v3.6、scoutが構築/差分更新。references/context-scoping.md）
+- `.jen/skillmap.json`（v3.7、scoutが構築/差分更新。references/behavior-audit.md）
+- `.jen/audit.md`（v3.7、scoutが作成/更新。references/behavior-audit.md）
 
 ## モード
 
@@ -134,6 +142,7 @@ release-managerがPR本文、検証結果、残リスク、ロールバック、
 - 教訓台帳: `references/lessons-protocol.md`
 - ループガード: `references/loop-guards.md`
 - コンテキストスコープ: `references/context-scoping.md`
+- スキルマップ/行動監査: `references/behavior-audit.md`
 - モデル階層(Fable構成): `references/model-tiering.md`
 - 役割と運用: `references/operating-model.md`
 - routing詳細: `references/routing-policy.md`
