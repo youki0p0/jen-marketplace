@@ -49,7 +49,7 @@ Jenというシステム自身の地図。
      （`jen-pmo` はメインセッションが担うため委譲先ではない、が既知の例外）。
   5. **散文中のモデルバージョン番号**（v3.8.1で追加）。`model:` は世代
      エイリアスなので自動追随するが、README / SKILL.md / model-tiering.md /
-     agent description に書かれた「Opus 5」「Fable 5」等の**説明文は追随しない**。
+     agent description に書かれた「Opus 5」「Fable 5.1」等の**説明文は追随しない**。
      v3.8.0時点で旧世代名「Opus 4.8」が10箇所残っていた実績がある。
      現行世代と食い違っていたら `issues` へ挙げる（直すのはPMO/人間）。
 - 初回はagents/skills/commands/references配下をフルスキャンして構築する。

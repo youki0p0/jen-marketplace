@@ -4,7 +4,7 @@
 
 v3 の核は「**指揮は Fable、実行は安いモデル**」。
 オーケストレーション（分解・順序付け・結果の判定・長時間の一貫性維持）は
-Claude Fable 5 の長所そのものであり、実装・調査などの手足は sonnet / haiku で足りる。
+Claude Fable 5.1 の長所そのものであり、実装・調査などの手足は sonnet / haiku で足りる。
 
 | 層 | agent | model | 理由 |
 |---|---|---|---|
@@ -28,8 +28,12 @@ Claude Fable 5 の長所そのものであり、実装・調査などの手足�
   世代が変わったら本文側を追随させる。
 - 特定バージョンへ固定したい場合のみ、`model:` にモデルIDを直接書く
   （その時点で自動追随はしなくなる）。
-- 執筆時点の解決先: fable=Claude Fable 5 / opus=Claude Opus 5 /
+- 執筆時点の解決先: fable=Claude Fable 5.1 / opus=Claude Opus 5 /
   sonnet=Claude Sonnet 5 / haiku=Claude Haiku 4.5。
+- **Fable 5 → Fable 5.1（v3.8.2で追随）**: Fable の現行世代は 5.1。Fable 5 も
+  引き続き提供されているが、5.1 は**同一ティア・同一単価**（$10/$50）の後継である。
+  したがって下記「Opus 5 の約2倍」というコスト関係も、目標分布 20:4:1 の
+  コスト按分も**変化しない**。「thinking を無効化できない」性質も 5.1 で維持。
 
 ### architect は opus のまま（検討したが不採用）
 
@@ -54,7 +58,7 @@ haiku → sonnet → opus → fable (jen-deep-solver)
 
 ## コスト規律
 
-- Fable 5 の API 単価は Opus 5 の約2倍。サブスク利用でも消費が速い。
+- Fable 5.1 の API 単価は Opus 5 の約2倍。サブスク利用でも消費が速い。
 - したがって Fable を使うのは **PMO と deep-solver の2箇所だけ**。
 - PMO は自分で実装・探索しない（v2 から継続の最重要ルール）。Fable の PMO が
   手を動かし始めるとコストとコンテキストが同時に汚れる。
@@ -131,7 +135,7 @@ v3.5では両者を同一視して「opus:fable ≈ 4:1 が健全」と書いて
 3. **classifier フォールバック**: 高リスク領域に触れるとセッションが Opus 5 へ
    ルーティングされ、そのまま Opus で継続することがある。longrun 中にこれを検知したら
    handoff を更新して新セッションで再開する（longrun-playbook 参照）。
-4. **thinking は常時 ON**: Fable 5 は adaptive thinking を無効化できない。
+4. **thinking は常時 ON**: Fable 5.1 は adaptive thinking を無効化できない。
    effort で調整する（PMO / deep-solver は max、それ以外は agent 定義に従う）。
 5. **agent frontmatter のキー（v3.8で調査結果を反映）**:
    公式にサポートが確認できたもの — `name` / `description` / `tools`（許可リスト）/

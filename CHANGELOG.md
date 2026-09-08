@@ -1,5 +1,41 @@
 # Changelog
 
+## v3.8.2 (2026-09-08) — Fable 5.1 への追随 ＋ longrun スキルのエディション混線を修正
+
+v3.8.1 で Opus/Sonnet は最新化したが、**Fable の世代交代を取りこぼしていた**。
+あわせて、モデル記述の棚卸し中に longrun スキルの実バグを2件発見・修正した。
+
+### 1. Fable 5 → Fable 5.1（散文20箇所）
+現行の Fable 世代は **Claude Fable 5.1**（`claude-fable-5-1`）。Fable 5 も引き続き
+提供されているが、5.1 は**同一ティア・同一単価（$10/$50）の後継**である。したがって:
+- 「Fable の単価は Opus の約2倍」というコスト規律は**そのまま成立**
+- 目標分布 20:4:1 のコスト按分（sonnet 57% / opus 29% / fable 14%）も**変化なし**
+- 「thinking を無効化できない（effort で調整する）」性質も 5.1 で維持
+
+`model:` は従来どおり `fable` エイリアスのままなので、**エージェントの動作は変わらない**。
+
+### 2. `jen-classic` の longrun スキルが Fable 版のコピーだった（実バグ）
+`plugins/jen-classic/skills/jen-longrun/SKILL.md` が Fable 版と**バイト単位で同一**で、
+Fable不要をうたう Classic 版が「メインセッションを `/model fable` で動かせ」
+「昇格は …→ fable (jen-deep-solver)」と指示していた。Classic の実際の昇格先は
+**opus合議**であり、記述と実装が矛盾していた。Classic 専用の内容に書き直し、
+再アンカリング・1サイクル1タスク・8サイクル毎のセッションローテーションという
+構造補償を明記した。
+
+### 3. 両エディションの longrun スキルが v3.8 の関係変更に未追随だった（実バグ）
+「Main session should run on Claude Fable 5 (`/model fable`)」という記述が残っていた。
+v3.8 でメインセッションは**伝言役**に降格し、PMOは `jen-pmo` subagent
+（frontmatter でモデル固定）が担うため、この指示は不要かつ誤り。両版とも修正した。
+
+### 4. その他
+- `references/model-tiering.md`（Fable版）に Fable 5 → 5.1 の継承関係と、
+  コスト関係が不変であることを明記
+- `plugin.json` / `marketplace.json` の版数を 3.8.2 へ
+
+### 執筆時点の解決先
+`fable` = Claude Fable 5.1 / `opus` = Claude Opus 5 /
+`sonnet` = Claude Sonnet 5 / `haiku` = Claude Haiku 4.5
+
 ## v3.8.1 (2026-08-28) — 最新世代モデルへの追随（jen / jen-classic 共通）
 
 ドキュメント修正のみ。**エージェントの動作は変わらない。**

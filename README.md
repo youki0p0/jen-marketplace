@@ -24,9 +24,9 @@
 - **伝言ゲームがない（v3.8）** — メインセッションはユーザーの言葉を*一字一句そのまま* `.jen/inbox.md` に保全して jen-pmo へ渡すだけ。要約・解釈をしないので、途中で意図が化けても原文に必ず戻れる
 - **ゴールだけ渡せばいい** — Jen が Mission Brief / 受入条件 / タスク台帳を作り、18体の専門エージェントに振り分ける
 - **「完成」を雰囲気で言わない** — Verifier（検収専任）が ACCEPT するまで完了扱いにしない。実装者と検証者を分離
-- **コストが暴れない** — 単価の高い Fable 5 は指揮（jen-pmo）と最終昇格先（jen-deep-solver）の2箇所のみ。手足は haiku / sonnet
+- **コストが暴れない** — 単価の高い Fable 5.1 は指揮（jen-pmo）と最終昇格先（jen-deep-solver）の2箇所のみ。手足は haiku / sonnet
 - **勝手に壊さない** — DB破壊・deploy・secret・auth/payment は Human Gate で必ず停止。危険コマンドは PreToolUse hook でブロック
-- **多日自走できる** — longrun モードはチェックポイント・handoff・品質ゲートを挟みながら完了まで回り続ける（Fable 5 の長時間自律性を活用）
+- **多日自走できる** — longrun モードはチェックポイント・handoff・品質ゲートを挟みながら完了まで回り続ける（Fable 5.1 の長時間自律性を活用）
 
 ## v3.4 の新要素 — ループガード
 
@@ -54,8 +54,8 @@
 
 | | jen（Fable版） | jen-classic（Opus版） |
 |---|---|---|
-| 指揮モデル | Fable 5 | Opus 5 |
-| 前提 | Fable 5が使えるプラン | 通常プランでOK |
+| 指揮モデル | Fable 5.1 | Opus 5 |
+| 前提 | Fable 5.1が使えるプラン | 通常プランでOK |
 | longrun | 多日自走 | 8サイクル毎にセッションローテーション |
 | 最終昇格 | deep-solver(fable)単独 | opus合議制（独立仮説×2→統合） |
 | コスト | 指揮が高単価（2箇所限定で抑制） | 合議込みでfable昇格と同水準 |
@@ -158,4 +158,4 @@ MIT — 商用含め自由に使えます。改変・再配布時は著作権表
 
 ---
 
-*Jen v1 の Sakana Fugu 型ルーティング思想を PMO 運用へ拡張した v2 を経て、v3 で Claude Fable 5 前提のモデル階層に再設計。設計の変遷は [docs/JEN_V3_DESIGN.md](docs/JEN_V3_DESIGN.md) に。*
+*Jen v1 の Sakana Fugu 型ルーティング思想を PMO 運用へ拡張した v2 を経て、v3 で Claude Fable 5.1 前提のモデル階層に再設計。設計の変遷は [docs/JEN_V3_DESIGN.md](docs/JEN_V3_DESIGN.md) に。*

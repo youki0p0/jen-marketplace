@@ -1,7 +1,7 @@
 # Jen v3 追補 — Fable Edition（2026-07-02）
 
 v3はv2のPMO運用（Mission Brief / Task Ledger / Quality Gate / Human Gate / handoff）を
-そのまま継承し、モデル階層だけを Claude Fable 5 前提に再設計したものです。
+そのまま継承し、モデル階層だけを Claude Fable 5.1 前提に再設計したものです。
 
 - 指揮（jen-pmo）: fable。長時間の計画維持・委譲・自己検証が主戦場。
 - 実行: haiku / sonnet / opus（v2と同じ）。

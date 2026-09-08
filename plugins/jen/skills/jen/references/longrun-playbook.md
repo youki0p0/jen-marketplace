@@ -40,7 +40,7 @@ board.md の進行中テーブルを handoff.md へ転記する。長時間の�
 
 ## Fable long-horizon notes (v3)
 
-- Fable 5 は多日規模の自走を想定して設計されている。cycleを止める理由がなければ
+- Fable 5.1 は多日規模の自走を想定して設計されている。cycleを止める理由がなければ
   handoff更新→次cycleへ進み続けてよい。
 - ただし委譲規律は維持する: PMO(fable)自身が実装を始めたらそれはdrift。
 - classifierフォールバック検知: セッションがOpus 5へ切り替わった通知が出たら、

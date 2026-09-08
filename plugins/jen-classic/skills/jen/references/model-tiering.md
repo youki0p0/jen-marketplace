@@ -62,7 +62,7 @@ haiku → sonnet → opus → opus合議(jen-deep-solver) → Human Gate
 
 ## コスト特性
 
-- Opus 5 は Fable 5 の約半額。合議制（opus×3呼び出し）を使っても
+- Opus 5 は Fable 5.1 の約半額。合議制（opus×3呼び出し）を使っても
   fable単独昇格とほぼ同等のコストに収まる。
 - PMO委譲規律（自分で実装しない）はClassicでも最重要。変更なし。
 
