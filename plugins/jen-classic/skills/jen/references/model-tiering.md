@@ -18,20 +18,22 @@ PMOは `jen-pmo` subagent（frontmatterで `model: opus` 固定、セッショ�
 ### モデル指定は世代エイリアス（v3.8.1で明文化）
 
 上表・各 `agents/*.md` の `model:` は **`opus` / `sonnet` / `haiku` の
-エイリアス**（Classicは `fable` を使わない）であり、`claude-opus-5` のような
+エイリアス**（Classicは `fable` を使わない）であり、`claude-opus-5-5` のような
 特定バージョンIDを固定していない。
 したがって Claude 側の世代が上がれば、Jen 側を書き換えなくても各層は
 **自動的に最新世代へ解決される**。
 
-- ドキュメント本文にバージョン番号（「Opus 5」等）が出てくるのは
+- ドキュメント本文にバージョン番号（「Opus 5.5」等）が出てくるのは
   **説明のための例示**であって、動作を決めているのはエイリアスの方である。
 - 逆に言えば、本文のバージョン番号は放置すると古くなる。skillmap 整合性
   チェック（behavior-audit.md）の「既知のドリフト源」として扱い、
   世代が変わったら本文側を追随させる。
 - 特定バージョンへ固定したい場合のみ、`model:` にモデルIDを直接書く
   （その時点で自動追随はしなくなる）。
-- 執筆時点の解決先: opus=Claude Opus 5 / sonnet=Claude Sonnet 5 /
+- 執筆時点の解決先: opus=Claude Opus 5.5 / sonnet=Claude Sonnet 5.5 /
   haiku=Claude Haiku 4.5。
+- **v3.8.3で追随**: opus 層が2割安くなり（$5/$25 → $4/$20）、指揮も上位実行も
+  Classic の主戦場なので、下記コスト特性を引き直した。
 
 ## Fableとの差分と構造補償
 
@@ -62,12 +64,16 @@ haiku → sonnet → opus → opus合議(jen-deep-solver) → Human Gate
 
 ## コスト特性
 
-- Opus 5 は Fable 5.1 の約半額。合議制（opus×3呼び出し）を使っても
-  fable単独昇格とほぼ同等のコストに収まる。
+- Opus 5.5 は Fable 5.1 の **約4割**（$4/$20 対 $10/$50）。合議制（opus×3呼び出し）でも
+  出力単価で $60 対 $50、**fable単独昇格の約1.2倍**に収まる（Opus 5 のときは約1.5倍）。
 - PMO委譲規律（自分で実装しない）はClassicでも最重要。変更なし。
 
 ## 運用上の注意
 
+- **Opus 5.5 は effort の既定が `medium`**（Opus 5 は `high`）。Classic は
+  **指揮（PMO）も上位実行も opus** なので、ここが一番効く。既定のまま回すと
+  長時間の計画維持が黙って浅くなる。深さが要る委譲では指示文に明示すること。
+- **thinking は無効化できない**（Opus 5.5 / Sonnet 5.5 とも）。effort で調整する。
 - `CLAUDE_CODE_SUBAGENT_MODEL` は未設定に（Fable版と同じ罠）。
 - jen（Fable版）と jen-classic を**同時に有効化しない**こと。
   agent名が同一のため競合する。切り替えは片方を disable してから。
