@@ -1,5 +1,36 @@
 # Changelog
 
+## v3.8.3 (2026-09-30) — Opus 5.5 / Sonnet 5.5 への追随
+
+`opus` / `sonnet` エイリアスの解決先が **Claude Opus 5.5** / **Claude Sonnet 5.5** に
+なったので、散文と、単価に依存していた数字を引き直した。`model:` はエイリアスの
+ままなので、**エージェントの動作そのものは変わらない**（v3.8.1 で明文化した方針）。
+
+### 1. 単価が動いたのは opus だけ（$5/$25 → $4/$20、2割安）
+sonnet は $2/$10 で据え置き、fable も $10/$50 で据え置き。そのため:
+
+- 「Fable は Opus の約2倍」→ **2.5倍**（$10/$50 対 $4/$20）
+- コスト按分（出力寄り加重・呼び出し比率 20:4:1 は不変）
+  sonnet 約57% / opus 約29% / fable 約14% → **sonnet 約61% / opus 約24% / fable 約15%**
+- Classic の合議制（opus×3）は fable単独の約1.5倍 → **約1.2倍**（$60 対 $50）
+
+### 2. Opus 5.5 は effort の既定が `medium`（Opus 5 は `high`）
+Jen は上位実行層（architect / debugger / strict-verifier）を opus に置いており、
+Classic では**指揮（PMO）も opus**。既定のまま回すと、難所を担う層が**黙って
+浅くなる**。両版の `model-tiering.md`「運用上の注意」に明記した。
+
+### 3. thinking を無効化できないモデルが増えた
+Fable 5.1 に加えて **Opus 5.5 / Sonnet 5.5 も adaptive thinking を切れない**
+（effort で調整する）。Fable版の注意書きを「Fable だけの性質」から書き直した。
+
+### 4. 散文の追随（14箇所）
+marketplace.json / 両 plugin.json / README の比較表 / Classic の SKILL・PMO・
+deep-solver / longrun-playbook の classifier フォールバック / behavior-audit の例示。
+
+### 執筆時点の解決先
+`fable` = Claude Fable 5.1 / `opus` = Claude Opus 5.5 /
+`sonnet` = Claude Sonnet 5.5 / `haiku` = Claude Haiku 4.5
+
 ## v3.8.2 (2026-09-08) — Fable 5.1 への追随 ＋ longrun スキルのエディション混線を修正
 
 v3.8.1 で Opus/Sonnet は最新化したが、**Fable の世代交代を取りこぼしていた**。
