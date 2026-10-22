@@ -168,7 +168,7 @@ plugins/jen/
 ├─ commands/    jen-status / jen-board / jen-standup / jen-pr / jen-audit
 ├─ hooks/       証拠台帳・完了ゲート・破壊的操作ガード＋ローカルログ
 └─ templates/   memory / prompts / report テンプレート
-tests/          v4 ハーネスの試験 16件（python3 -m unittest discover -s tests）
+tests/          v4 ハーネスの試験16件 ＋ AXIOM-0 チェッカー（CI で Python 3.10〜3.13 を通す）
 ```
 
 ## ライセンス

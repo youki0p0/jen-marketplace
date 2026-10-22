@@ -1,0 +1,68 @@
+name: test
+
+# なぜ CI を置くか:
+# v4 の主張は「エージェントがトークン出力では作れない証拠を持つ」である。
+# 試験スイートを誰も自動で走らせないなら、その結果は「エージェントの自己申告」
+# ——v4 自身が weak と分類している証拠——にすぎない。
+# CI が push ごとに走ることで、試験結果は strong な証拠になる。
+#
+# AXIOM-0 との関係: CI は Claude の外で走るが、**判断**をしているのではなく
+# **実行**しているだけなので違反ではない（ブラウザ自動化を許したのと同じ線引き）。
+# ワークフロー自体も依存をインストールしない（標準ライブラリのみ）。
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  harness-tests:
+    name: harness tests (py${{ matrix.python }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # ドキュメントが「Python 3.10+」と書いているので、その下限を実際に検める
+        python: ["3.10", "3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: "依存が無いことを確認（AXIOM-0: hooks は標準ライブラリのみ）"
+        run: |
+          test ! -f requirements.txt || { echo "requirements.txt があると AXIOM-0 に反する"; exit 1; }
+          python -c "import sys; print(sys.version)"
+
+      - name: ハーネス試験
+        run: python -m unittest discover -s tests -v
+
+  axiom-0:
+    name: AXIOM-0 と構成の整合
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: AXIOM-0 チェック
+        run: python tests/check_axiom0.py
+
+      - name: hooks が構文として妥当か（両版）
+        run: |
+          python -m compileall -q plugins/jen/hooks plugins/jen-classic/hooks
+
+      - name: 状態ファイルがコミットされていないこと
+        run: |
+          if git ls-files --error-unmatch .jen 2>/dev/null; then
+            echo ".jen/ がコミットされている（実行時の状態ファイルなので入れない）"
+            exit 1
+          fi
+          echo "ok  .jen/ は追跡されていない"
