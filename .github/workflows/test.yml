@@ -11,12 +11,19 @@ name: test
 # ワークフロー自体も依存をインストールしない（標準ライブラリのみ）。
 
 on:
+  # push は main だけに限る。PR ブランチへの push は pull_request 側で走るので、
+  # branches: ["**"] と併記すると**同じジョブが2回**走る（初回の実行で10件になった）。
   push:
-    branches: ["**"]
+    branches: [main]
   pull_request:
 
 permissions:
   contents: read
+
+# 同じ参照に続けて push したとき、古い実行を打ち切る
+concurrency:
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   harness-tests:
