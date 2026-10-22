@@ -85,6 +85,37 @@ python3 "$H/evidence_ledger.py" budget
 > Jen 側では検証していない。数えられなければ `budget` は「判定不能（ログ不足）」を返す。
 > 黙って 0 とは言わない。
 
+## agent を証拠能力で分類する（削らない理由）
+
+Lean版が「単一で回すのが既定」になると、18体の agent が宙に浮く。
+だが**削らない。** Lean版のコストは「選択肢を持つこと」ではなく「**理由なく振ること**」である。
+削除は不可逆で capability を失う一方、得られるのは「一覧が短くなる」だけ。
+
+代わりに、v4 の証拠ゲートが自動的に引いてくれる線で分類する。
+完了は証拠の被覆で決まるので、各 agent は**どの強度の証拠を作れるか**で分かれる:
+
+| 作れる証拠 | agent | Lean版での扱い |
+|---|---|---|
+| **strong**（台帳が実行して終了コードを取れる成果） | builder / frontend / test / debugger / verifier / strict-verifier | **既定経路** |
+| **medium**（file:line の引用を返す） | scout / release-manager | **既定経路**（scout は省略不可） |
+| medium（外部の一次情報を引く） | research | opt-in |
+| **weak のみ**（意見・分析） | ux-critic / contrarian-reviewer / monetization-reviewer / product-strategist / ideation | **opt-in** |
+
+**最後の群が既定から外れる理由は、好みではなく構造である。**
+意見は `attest --kind note` = `weak` にしかならず、既定の `require=medium` に届かない。
+つまり**呼んでも主張が閉じない＝完了に近づかない**。
+価値が無いのではなく、**完了判定とは別の軸**にある。
+
+例外: **jen-security-reviewer は条件付きで必須**。auth / payment / secret /
+security 境界に触るときは省略しない。これは Human Gate のトリガと同じ条件であり、
+「証拠を作れるか」ではなく「踏んだら戻れないか」で判断する軸だから
+（AXIOM-0 と同じく、期限の無い賭け）。
+
+opt-in の群を呼ぶときは、`board.md` に**何を決めるために呼んだか**を書く。
+書けないなら呼ぶ理由が無い。
+
+この扱いは opus合議制を既定から外したのと同じである——**機構は残し、既定から外す**。
+
 ## やらないこと（Lean 版で意図的に省くもの）
 
 - **「念のため」の委譲。** reviewer を全部通す、のような網羅は Lean 版ではしない。

@@ -113,6 +113,28 @@ v4 で目的そのものを変える:
 
 新規: `plugins/jen-classic/skills/jen/references/lean-policy.md`
 
+**agent は18体のまま削っていない。証拠能力で分類した。**
+Lean版が「単一で回すのが既定」になると18体が宙に浮くが、削除は不可逆で capability を失う
+一方、得られるのは「一覧が短くなる」だけ。代わりに v4 の証拠ゲートが自動的に引く線で分けた:
+
+| 作れる証拠 | agent | 扱い |
+|---|---|---|
+| **strong**（台帳が実行して終了コードを取れる） | builder / frontend / test / debugger / verifier / strict-verifier | 既定経路 |
+| **medium**（file:line を返す） | scout / release-manager | 既定経路（scout は省略不可） |
+| **weak のみ**（意見・分析） | ux-critic / contrarian / monetization / product-strategist / ideation | **opt-in** |
+
+意見系6体が既定から外れるのは好みではなく**構造**である。意見は `attest --kind note` =
+`weak` にしかならず既定の `require=medium` に届かないので、**呼んでも主張が閉じない**
+（＝完了に近づかない）。価値が無いのではなく完了判定とは別の軸にある。
+例外として **jen-security-reviewer は条件付きで必須**（auth/payment/secret に触るとき）。
+これは「証拠を作れるか」ではなく「踏んだら戻れないか」の軸なので、AXIOM-0 と同じく期限の無い賭け。
+
+Lean版 PMO のルーティング表を、18行のフラットな一覧から
+「既定経路 / 条件付き必須 / opt-in」の3段に再構成した。表そのものが毎回の
+コンテキストコストなので、短い既定経路を先に置き、委譲へのバイアスを下げる。
+扱いは opus合議制と同じ——**機構は残し、既定から外す**。
+
+
 ### README の透明性の節を訂正
 「hooks は40行程度の Python なので目視できます」は v4 で**偽**になった（67行→約760行）。
 ファイル別の実数（evidence_ledger 503 / stop_gate 116 / guard_patterns 66 /

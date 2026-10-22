@@ -89,27 +89,45 @@ deployは人間承認まで止める。
 ### longrun
 1サイクル = Mission → Task → Implement → Verify → Checkpoint → Handoff。
 
-## ルーティング早見表
+## ルーティング早見表（Lean版・既定経路は短い）
+
+**まず「自分のコンテキストに収まるか」を自問する。収まるなら振らない。**
+振ると決めたら、下の**既定経路**から選ぶ。
+
+### 既定経路 — 主張を閉じられる agent（strong/medium の証拠を作れる）
+
+| 状況 | agent | 作れる証拠 |
+|---|---|---|
+| リポジトリ内調査・codemap | jen-scout | medium（file:line） |
+| 通常実装 | jen-builder | strong（台帳が test を実行できる） |
+| UI実装 | jen-frontend | strong |
+| テスト/QA | jen-test | strong |
+| 通常検収 | jen-verifier | strong |
+| 高リスク検収 | jen-strict-verifier | strong |
+| 難設計/境界/性能（REJECT後の昇格先） | jen-architect | 設計判断（証拠は下流で出る） |
+| 原因不明バグ（REJECT後の昇格先） | jen-debugger | strong |
+| PR/リリース準備 | jen-release-manager | medium |
+| 上位層が失敗した難問 | jen-deep-solver（単発） | — |
+
+### 条件付きで必須
 
 | 状況 | agent |
 |---|---|
-| リポジトリ内調査 | jen-scout |
-| 外部/公式docs調査 | jen-research |
-| 仕様改善/優先度 | jen-product-strategist |
-| 発想出し | jen-ideation |
-| UI/UX検収 | jen-ux-critic |
-| 反対意見/破綻予測 | jen-contrarian-reviewer |
-| security/auth/payment/secret | jen-security-reviewer |
-| 収益化/価格導線 | jen-monetization-reviewer |
-| 通常実装 | jen-builder |
-| UI実装 | jen-frontend |
-| テスト/QA | jen-test |
-| 難設計/境界/性能 | jen-architect |
-| 原因不明バグ | jen-debugger |
-| 通常検収 | jen-verifier |
-| 高リスク検収 | jen-strict-verifier |
-| PR/リリース準備 | jen-release-manager |
-| opus層が失敗した難問 | jen-deep-solver（単発）。合議は人間の明示要求時のみ |
+| auth / payment / secret / security 境界に触る | **jen-security-reviewer**（Human Gate のトリガと同じ条件。ここは省略しない） |
+
+### opt-in — 人間が求めたときだけ呼ぶ
+
+| agent | Lean版で既定にしない理由 |
+|---|---|
+| jen-research | 外部調査。必要な場面は実際にあるが、**まず手元で足りるか**を見てから |
+| jen-ux-critic / jen-contrarian-reviewer / jen-monetization-reviewer / jen-product-strategist / jen-ideation | 出力が**意見・分析**であり、証拠としては `weak` にしかならない。`require=medium` の主張を**閉じられない**（＝呼んでも完了に近づかない）。価値が無いのではなく、**完了判定とは別の軸**なので既定経路から外す |
+
+**opt-in の群を呼ぶときは、board.md に「何を決めるために呼んだか」を書く。**
+書けないなら呼ぶ理由が無い。
+
+> この分類は headcount ではなく**証拠能力**で引いている。
+> agent は18体のまま減らしていない — Lean版のコストは「選択肢を持つこと」ではなく
+> 「理由なく振ること」だから。合議制を既定から外したのと同じ扱い。
 
 ## 可視化プロトコル（v3.2・必須）
 
