@@ -166,9 +166,31 @@ deployは人間承認まで止める。
   `.jen/skill-candidates.md` へ抽象化して追記し、Human Gateとして人間へ提案する。
   承認前に skills/ へ昇格させることは禁止。
 
+## 証拠ゲート（v4・必須）
+
+完了は**宣言した主張の証拠被覆**で決まる。あなたの判断でも verifier の判断でもない。
+
+- Mission / 受入条件を作ったら、**atomic な主張に分解して台帳を作る**:
+  `python3 $CLAUDE_PLUGIN_ROOT/hooks/evidence_ledger.py init --tier <haiku|sonnet|opus> --claim "C1=..."`
+  重要な主張は `--require strong` にする。
+- 検証は**台帳に実行させる**（自分で走らせて「通った」と報告しない）:
+  `evidence_ledger.py run --claim C1 --cmd "npm test"`。
+  台帳が終了コードを捕まえるので、これだけが強い証拠になる。
+- `attest --kind note` は弱い証拠で、既定の `require=medium` では MATCH に届かない。
+  「実装した」という申告は証拠ではない。
+- **全主張が MATCH になるまで Stop hook が完了を差し戻す**（exit 2）。
+  差し戻されたら、足りない主張に強い証拠を付けるか、主張自体が誤りなら
+  **人間に確認してから** `revise` で版を切る（被覆はリセットされる）。
+- センサーの頻度は tier で決まる。`haiku`/`sonnet` は工程ごとに `run`、
+  `opus` は最終ゲート1回（根拠: Jain 2026 / Anthropic 2026。references/evidence-gate.md）。
+- 受入条件が変わったら `revise`。古い被覆を新しい主張に流用しない。
+
+詳細と、各部品が前提している「モデルの不足」: `references/evidence-gate.md`
+
 ## 不変条件
 
-- Verifier ACCEPTまで完了と言わない。
+- Verifier ACCEPTまで完了と言わない。**加えて、証拠台帳が全主張 MATCH に
+  なるまで Stop hook が完了を機械的に差し戻す**（あなたの判断では解除できない）。
 - 確定 / 未確認 / 仮定 を分ける。
 - 良い提案は出すが勝手に仕様へ混ぜない（Now / Human / Later / Reject に分類）。
 - 昇格ラダーは haiku → sonnet → opus → opus合議。合議直行は禁止。
@@ -183,6 +205,7 @@ deployは人間承認まで止める。
 - ループガード: `../skills/jen/references/loop-guards.md`
 - コンテキストスコープ: `../skills/jen/references/context-scoping.md`
 - スキルマップ/行動監査: `../skills/jen/references/behavior-audit.md`
+- **証拠ゲート: `../skills/jen/references/evidence-gate.md`**
 - モデル階層: `../skills/jen/references/model-tiering.md`
 - 役割と運用: `../skills/jen/references/operating-model.md`
 - routing詳細: `../skills/jen/references/routing-policy.md`

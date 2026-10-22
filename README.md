@@ -1,6 +1,8 @@
-# Jen v3 — Fable Edition 🎼
+# Jen v4 — Evidence Gate 🎼
 
-**指揮は Fable、実行は安く。** ゴールを渡すだけで、分解・委譲・検証・差し戻し・リリース準備まで管理する PMO 型 AI 開発オーケストレーター（Claude Code プラグイン）。
+**完了は、証拠で決める。** ゴールを渡すだけで、分解・委譲・検証・差し戻し・リリース準備まで管理する PMO 型 AI 開発オーケストレーター（Claude Code プラグイン）。
+
+指揮と実行を分け、**受入条件への証拠が揃うまで完了を認めません**（判定はモデル、合成は決定論）。
 
 呼び名：Jen / Jenifer / Jenny / ジェン / ジェニー / ジェニファー
 
@@ -27,6 +29,22 @@
 - **コストが暴れない** — 単価の高い Fable 5.1 は指揮（jen-pmo）と最終昇格先（jen-deep-solver）の2箇所のみ。手足は haiku / sonnet
 - **勝手に壊さない** — DB破壊・deploy・secret・auth/payment は Human Gate で必ず停止。危険コマンドは PreToolUse hook でブロック
 - **多日自走できる** — longrun モードはチェックポイント・handoff・品質ゲートを挟みながら完了まで回り続ける（Fable 5.1 の長時間自律性を活用）
+
+## v4 の新要素 — 証拠ゲート（完了判定を決定論へ）
+
+**v3 までの Jen は、ほぼ全部がプロンプトでした。** 「ガード」と呼んでいたものは Bash への正規表現か、**LLM に従うようお願いしている文**のどちらかでした。v4 は完了判定だけを決定論に移します。
+
+受入条件を atomic な「主張」に分解し、主張ごとに証拠を貯めます。**全主張が揃うまで Stop hook が完了を機械的に差し戻します**（LLM に「終わっていいか」を聞きません）。証拠には3段階あり、いちばん強いのは**ハーネスが自分でコマンドを実行して捕まえた終了コード**です。エージェントは「テストが通った」をトークン出力では作れません。
+
+```
+[x] C1  MATCH    require=medium got=strong   lint / typecheck / test が通る
+[ ] C2  NULL     require=medium got=none     初回画面に次アクションが表示される
+NOT_ALL_MATCH  → 完了を認めない
+```
+
+センサーの頻度は**モデル階層で切り替わります**。安いモデル（haiku/sonnet）では工程ごとに検証し、上位層（opus）では最終ゲート1回に畳みます。独立した2つの一次情報（Jain 2026-10 / Anthropic 2026-03）が「独立した検収は常に必要。変わるのは走らせる頻度だけ」という同じ結論に達しているためです。設計の根拠と各部品が前提している「モデルの不足」は [evidence-gate.md](plugins/jen/skills/jen/references/evidence-gate.md) に。
+
+> ⚠️ **効果は測っていません。** 「hook で強制した検証ループ vs プロンプトのみ」の完了率を比較した研究は見つかりませんでした。偽造も暗号的には防げていません（カジュアルな抜け道を塞ぎ、事後に検出可能にするまで）。どちらも正直に書いてあります。
 
 ## v3.4 の新要素 — ループガード
 
@@ -148,8 +166,9 @@ plugins/jen/
 │                strategist, ideation, release-manager, deep-solver）
 ├─ skills/      jen / jen-longrun / jen-repair / jen-review / jen-release
 ├─ commands/    jen-status / jen-board / jen-standup / jen-pr / jen-audit
-├─ hooks/       破壊的操作ガード＋ローカルログ
+├─ hooks/       証拠台帳・完了ゲート・破壊的操作ガード＋ローカルログ
 └─ templates/   memory / prompts / report テンプレート
+tests/          v4 ハーネスの試験 16件（python3 -m unittest discover -s tests）
 ```
 
 ## ライセンス
