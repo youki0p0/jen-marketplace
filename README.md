@@ -1,6 +1,8 @@
-# Jen v3 — Fable Edition 🎼
+# Jen v4 — Evidence Gate 🎼
 
-**指揮は Fable、実行は安く。** ゴールを渡すだけで、分解・委譲・検証・差し戻し・リリース準備まで管理する PMO 型 AI 開発オーケストレーター（Claude Code プラグイン）。
+**完了は、証拠で決める。** ゴールを渡すだけで、分解・委譲・検証・差し戻し・リリース準備まで管理する PMO 型 AI 開発オーケストレーター（Claude Code プラグイン）。
+
+指揮と実行を分け、**受入条件への証拠が揃うまで完了を認めません**（判定はモデル、合成は決定論）。
 
 呼び名：Jen / Jenifer / Jenny / ジェン / ジェニー / ジェニファー
 
@@ -28,6 +30,22 @@
 - **勝手に壊さない** — DB破壊・deploy・secret・auth/payment は Human Gate で必ず停止。危険コマンドは PreToolUse hook でブロック
 - **多日自走できる** — longrun モードはチェックポイント・handoff・品質ゲートを挟みながら完了まで回り続ける（Fable 5.1 の長時間自律性を活用）
 
+## v4 の新要素 — 証拠ゲート（完了判定を決定論へ）
+
+**v3 までの Jen は、ほぼ全部がプロンプトでした。** 「ガード」と呼んでいたものは Bash への正規表現か、**LLM に従うようお願いしている文**のどちらかでした。v4 は完了判定だけを決定論に移します。
+
+受入条件を atomic な「主張」に分解し、主張ごとに証拠を貯めます。**全主張が揃うまで Stop hook が完了を機械的に差し戻します**（LLM に「終わっていいか」を聞きません）。証拠には3段階あり、いちばん強いのは**ハーネスが自分でコマンドを実行して捕まえた終了コード**です。エージェントは「テストが通った」をトークン出力では作れません。
+
+```
+[x] C1  MATCH    require=medium got=strong   lint / typecheck / test が通る
+[ ] C2  NULL     require=medium got=none     初回画面に次アクションが表示される
+NOT_ALL_MATCH  → 完了を認めない
+```
+
+センサーの頻度は**モデル階層で切り替わります**。安いモデル（haiku/sonnet）では工程ごとに検証し、上位層（opus）では最終ゲート1回に畳みます。独立した2つの一次情報（Jain 2026-10 / Anthropic 2026-03）が「独立した検収は常に必要。変わるのは走らせる頻度だけ」という同じ結論に達しているためです。設計の根拠と各部品が前提している「モデルの不足」は [evidence-gate.md](plugins/jen/skills/jen/references/evidence-gate.md) に。
+
+> ⚠️ **効果は測っていません。** 「hook で強制した検証ループ vs プロンプトのみ」の完了率を比較した研究は見つかりませんでした。偽造も暗号的には防げていません（カジュアルな抜け道を塞ぎ、事後に検出可能にするまで）。どちらも正直に書いてあります。
+
 ## v3.4 の新要素 — ループガード
 
 エージェントループの三大事故「止まらない・空転する・同じ手を繰り返す」を構造で封じます。同一アプローチの3回目は禁止（STUCK→担当替え/昇格）、台帳が2サイクル動かなければブレーカーが作動して**戦略ごと引き直し**（外側リセット）、実行なしの再計画は2回まで。停止するときも「何ができて・なぜ止まり・人間は何をすればいいか」の3点報告が義務です。
@@ -52,13 +70,22 @@
 
 ## エディションを選ぶ
 
-| | jen（Fable版） | jen-classic（Opus版） |
+**目的が違います。** 片方は成果の天井を上げる版、もう片方は同じ成果を安く出す版です。
+
+| | jen（Fable版） | **jen-classic（Lean版）** |
 |---|---|---|
+| **目的** | 成果の天井を上げる | **同じ成果をより少ない資源で** |
+| 既定の動き | 分解して委譲 | **単一で回す。**委譲はコンテキスト劣化時のみ |
+| 開始モデル | sonnet | **haiku。**昇格は実測の REJECT 後 |
+| 並列ファンアウト | 独立タスクは並列 | **既定で行わない** |
+| 最終昇格 | deep-solver(fable) 単独 | deep-solver 単発（**合議は opt-in**） |
+| センサー頻度 | opus で最終ゲート1回 | **連続**（安い層で回すため） |
+| レビュー群（意見系6体） | 必要に応じて呼ぶ | **opt-in**（意見は weak 証拠なので主張を閉じられない） |
 | 指揮モデル | Fable 5.1 | Opus 5.5 |
 | 前提 | Fable 5.1が使えるプラン | 通常プランでOK |
 | longrun | 多日自走 | 8サイクル毎にセッションローテーション |
-| 最終昇格 | deep-solver(fable)単独 | opus合議制（独立仮説×2→統合） |
-| コスト | 指揮が高単価（2箇所限定で抑制） | 合議込みでfable昇格と同水準 |
+
+Lean版の判断則は1行です——**「委譲するのは、単一エージェントの実効的なコンテキスト利用が劣化するときだけ」**。情報理論（Data Processing Inequality）に基づく Tran & Kiela 2026 の議論に拠っています: 固定トークン予算下では単一エージェントの方が情報効率が高く、多エージェントが競争力を持つのは単一のコンテキストが劣化したとき、または**より多く計算を費やしたとき**。報告されている多エージェントの優位の多くは「計上されていない計算量」で説明されます。詳細は [lean-policy.md](plugins/jen-classic/skills/jen/references/lean-policy.md)。
 
 **どちらか片方だけ**をインストールしてください（agent名が共通のため同時有効化は競合します）。
 
@@ -75,10 +102,10 @@ Claude Code 内で：
 /plugin marketplace add youki0p0/jen-marketplace
 /plugin install jen@jen-marketplace          # Fable版
 #  または
-/plugin install jen-classic@jen-marketplace  # Opus版(Fable不要)
+/plugin install jen-classic@jen-marketplace  # Lean版(Fable不要・最小資源)
 
 /model fable   # 任意。v3.8以降メインセッションは伝言役なので必須ではない
-/model opus    # Classic版の場合
+/model opus    # Lean版の場合
 ```
 
 以上。リポジトリに何も展開しません（状態ファイル `.jen/` は実行時に作られます）。
@@ -116,8 +143,9 @@ Acceptance Criteria:
 
 サードパーティのスキル/プラグインは中身を確認してから入れるのが原則です。Jen は全部読めます：
 
-- **外部通信なし** — hooks / scripts に curl・fetch・外部送信は一切ありません（[hooks/](plugins/jen/hooks/) は40行程度の Python なので目視できます）
-- **hooks がやること** — `pre_tool_guard.py`（`rm -rf /`・force push・publish・deploy・DROP TABLE 等を**ブロックする側**）、`post_tool_log.py` / `stop_append_summary.py`（`.jen/logs/` へのローカル JSONL 追記のみ）
+- **外部通信なし** — hooks に curl・fetch・外部送信は一切ありません。**標準ライブラリのみ**で、CI が機械的に検証しています（`tests/check_axiom0.py`）
+- **hooks の規模** — 全6ファイルで約760行。内訳は `evidence_ledger.py` 503 / `stop_gate.py` 116 / `guard_patterns.py` 66 / `pre_tool_guard.py` 43 / `post_tool_log.py` 17 / `stop_append_summary.py` 18。v3 までは67行だったので、**v4 で増えています**（目視するなら台帳が本体です）
+- **hooks がやること** — `guard_patterns.py` + `pre_tool_guard.py`（`rm -rf /`・force push・publish・deploy・DROP TABLE 等を**ブロックする側**）、`evidence_ledger.py` + `stop_gate.py`（受入条件の証拠が揃うまで完了を差し戻す。検証コマンドは台帳が自分で実行する）、`post_tool_log.py` / `stop_append_summary.py`（`.jen/logs/` へのローカル JSONL 追記のみ）
 - **secret を要求しない** — APIキー・トークン入力を求める箇所はありません
 - **書き込み先** — 作業中のリポジトリ内の `.jen/`（状態・ログ）のみ
 
@@ -148,8 +176,9 @@ plugins/jen/
 │                strategist, ideation, release-manager, deep-solver）
 ├─ skills/      jen / jen-longrun / jen-repair / jen-review / jen-release
 ├─ commands/    jen-status / jen-board / jen-standup / jen-pr / jen-audit
-├─ hooks/       破壊的操作ガード＋ローカルログ
+├─ hooks/       証拠台帳・完了ゲート・破壊的操作ガード＋ローカルログ
 └─ templates/   memory / prompts / report テンプレート
+tests/          v4 ハーネスの試験16件 ＋ AXIOM-0 チェッカー（CI で Python 3.10〜3.13 を通す）
 ```
 
 ## ライセンス
