@@ -33,7 +33,7 @@
     {
       "name": "jen-classic",
       "source": "./plugins/jen-classic",
-      "description": "Jen v3 Classic — Fable不要版。指揮をOpus 5.5に載せ、再アンカリング・セッションローテーション・opus合議制でFable版相当の品質を狙う。jen(Fable版)とは同時に有効化しないこと。",
+      "description": "Jen Lean版 — 同じ成果をより少ない資源で。既定は単一エージェントで回し、単一のコンテキスト利用が劣化するときだけ委譲する（Tran & Kiela 2026）。haikuから始め、実測のREJECTで昇格。委譲回数はhookの実ログで数える。Fable不要。jen(Fable版)とは同時に有効化しないこと。",
       "version": "4.0.0",
       "author": {
         "name": "Yuukinosh",

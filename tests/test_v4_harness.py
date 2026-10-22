@@ -203,6 +203,56 @@ class HarnessTest(unittest.TestCase):
         self.assertNotEqual(res.returncode, 0,
                             "attest から強い証拠を宣言できてしまった")
 
+    # Lean 方針（jen-classic）の資源計測
+    def test_budget_says_unknown_rather_than_zero_when_log_is_absent(self):
+        """測れないときに黙って 0 と言わないこと（最も危険な嘘）."""
+        res = ledger(self.cwd, "init", "--force", "--tier", "haiku",
+                     "--max-delegations", "3", "--claim", "C1=x")
+        self.assertEqual(res.returncode, 0, res.stderr)
+        res = ledger(self.cwd, "budget")
+        self.assertEqual(res.returncode, 0)
+        self.assertIn("判定不能", res.stdout)
+        self.assertNotIn("委譲回数: 0", res.stdout)
+
+    def test_budget_says_unknown_when_payload_schema_is_unrecognised(self):
+        ledger(self.cwd, "init", "--force", "--tier", "haiku",
+               "--max-delegations", "3", "--claim", "C1=x")
+        log = self.cwd / ".jen/logs/tool-events.jsonl"
+        log.parent.mkdir(parents=True, exist_ok=True)
+        log.write_text('{"unexpected":"shape"}\n', encoding="utf-8")
+        res = ledger(self.cwd, "budget")
+        self.assertIn("判定不能", res.stdout)
+
+    def test_budget_counts_delegations_from_the_real_log(self):
+        ledger(self.cwd, "init", "--force", "--tier", "haiku",
+               "--max-delegations", "3", "--claim", "C1=x")
+        log = self.cwd / ".jen/logs/tool-events.jsonl"
+        log.parent.mkdir(parents=True, exist_ok=True)
+        lines = [json.dumps({"event": "PostToolUse", "data": {"tool_name": n}})
+                 for n in ("Agent", "Agent", "Bash", "Read", "Task")]
+        log.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        res = ledger(self.cwd, "budget")
+        self.assertEqual(res.returncode, 0, "上限3に対し3回なので超過ではない")
+        self.assertIn("委譲回数: 3", res.stdout)
+
+    def test_budget_flags_overage_without_hard_stopping(self):
+        ledger(self.cwd, "init", "--force", "--tier", "haiku",
+               "--max-delegations", "1", "--claim", "C1=x")
+        log = self.cwd / ".jen/logs/tool-events.jsonl"
+        log.parent.mkdir(parents=True, exist_ok=True)
+        log.write_text("\n".join(
+            json.dumps({"event": "PostToolUse", "data": {"tool_name": "Agent"}})
+            for _ in range(3)) + "\n", encoding="utf-8")
+        res = ledger(self.cwd, "budget")
+        self.assertEqual(res.returncode, 1)
+        self.assertIn("上限超過", res.stderr)
+        self.assertIn("強制停止はしない", res.stderr,
+                      "v3.4 以来の不変条件（数値による hard-stop はしない）が守られていない")
+        # 超過しても gate の判断は被覆だけで決まること
+        ledger(self.cwd, "run", "--claim", "C1", "--cmd", "true")
+        self.assertEqual(ledger(self.cwd, "gate").returncode, 0,
+                         "予算超過がゲートを塞いでしまっている（被覆とは独立であるべき）")
+
     def test_artifact_evidence_is_medium_not_strong(self):
         (self.cwd / "report.txt").write_text("test output", encoding="utf-8")
         ledger(self.cwd, "attest", "--claim", "C1", "--kind", "artifact", "--ref", "report.txt")

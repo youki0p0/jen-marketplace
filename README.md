@@ -70,13 +70,21 @@ NOT_ALL_MATCH  → 完了を認めない
 
 ## エディションを選ぶ
 
-| | jen（Fable版） | jen-classic（Opus版） |
+**目的が違います。** 片方は成果の天井を上げる版、もう片方は同じ成果を安く出す版です。
+
+| | jen（Fable版） | **jen-classic（Lean版）** |
 |---|---|---|
+| **目的** | 成果の天井を上げる | **同じ成果をより少ない資源で** |
+| 既定の動き | 分解して委譲 | **単一で回す。**委譲はコンテキスト劣化時のみ |
+| 開始モデル | sonnet | **haiku。**昇格は実測の REJECT 後 |
+| 並列ファンアウト | 独立タスクは並列 | **既定で行わない** |
+| 最終昇格 | deep-solver(fable) 単独 | deep-solver 単発（**合議は opt-in**） |
+| センサー頻度 | opus で最終ゲート1回 | **連続**（安い層で回すため） |
 | 指揮モデル | Fable 5.1 | Opus 5.5 |
 | 前提 | Fable 5.1が使えるプラン | 通常プランでOK |
 | longrun | 多日自走 | 8サイクル毎にセッションローテーション |
-| 最終昇格 | deep-solver(fable)単独 | opus合議制（独立仮説×2→統合） |
-| コスト | 指揮が高単価（2箇所限定で抑制） | 合議込みでfable昇格と同水準 |
+
+Lean版の判断則は1行です——**「委譲するのは、単一エージェントの実効的なコンテキスト利用が劣化するときだけ」**。情報理論（Data Processing Inequality）に基づく Tran & Kiela 2026 の議論に拠っています: 固定トークン予算下では単一エージェントの方が情報効率が高く、多エージェントが競争力を持つのは単一のコンテキストが劣化したとき、または**より多く計算を費やしたとき**。報告されている多エージェントの優位の多くは「計上されていない計算量」で説明されます。詳細は [lean-policy.md](plugins/jen-classic/skills/jen/references/lean-policy.md)。
 
 **どちらか片方だけ**をインストールしてください（agent名が共通のため同時有効化は競合します）。
 
@@ -93,10 +101,10 @@ Claude Code 内で：
 /plugin marketplace add youki0p0/jen-marketplace
 /plugin install jen@jen-marketplace          # Fable版
 #  または
-/plugin install jen-classic@jen-marketplace  # Opus版(Fable不要)
+/plugin install jen-classic@jen-marketplace  # Lean版(Fable不要・最小資源)
 
 /model fable   # 任意。v3.8以降メインセッションは伝言役なので必須ではない
-/model opus    # Classic版の場合
+/model opus    # Lean版の場合
 ```
 
 以上。リポジトリに何も展開しません（状態ファイル `.jen/` は実行時に作られます）。
@@ -134,8 +142,9 @@ Acceptance Criteria:
 
 サードパーティのスキル/プラグインは中身を確認してから入れるのが原則です。Jen は全部読めます：
 
-- **外部通信なし** — hooks / scripts に curl・fetch・外部送信は一切ありません（[hooks/](plugins/jen/hooks/) は40行程度の Python なので目視できます）
-- **hooks がやること** — `pre_tool_guard.py`（`rm -rf /`・force push・publish・deploy・DROP TABLE 等を**ブロックする側**）、`post_tool_log.py` / `stop_append_summary.py`（`.jen/logs/` へのローカル JSONL 追記のみ）
+- **外部通信なし** — hooks に curl・fetch・外部送信は一切ありません。**標準ライブラリのみ**で、CI が機械的に検証しています（`tests/check_axiom0.py`）
+- **hooks の規模** — 全6ファイルで約760行。内訳は `evidence_ledger.py` 503 / `stop_gate.py` 116 / `guard_patterns.py` 66 / `pre_tool_guard.py` 43 / `post_tool_log.py` 17 / `stop_append_summary.py` 18。v3 までは67行だったので、**v4 で増えています**（目視するなら台帳が本体です）
+- **hooks がやること** — `guard_patterns.py` + `pre_tool_guard.py`（`rm -rf /`・force push・publish・deploy・DROP TABLE 等を**ブロックする側**）、`evidence_ledger.py` + `stop_gate.py`（受入条件の証拠が揃うまで完了を差し戻す。検証コマンドは台帳が自分で実行する）、`post_tool_log.py` / `stop_append_summary.py`（`.jen/logs/` へのローカル JSONL 追記のみ）
 - **secret を要求しない** — APIキー・トークン入力を求める箇所はありません
 - **書き込み先** — 作業中のリポジトリ内の `.jen/`（状態・ログ）のみ
 

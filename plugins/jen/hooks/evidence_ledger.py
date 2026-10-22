@@ -181,8 +181,12 @@ def cmd_init(a) -> int:
         "sensor_mode": TIER_SENSOR.get(tier, "continuous"),
         "created_at": now(), "claims": claims, "history": [],
     }
-    save(doc, "init", f"tier={tier} claims={len(claims)}")
-    print(f"OK init  tier={tier}  sensor={doc['sensor_mode']}  claims={len(claims)}")
+    if a.max_delegations is not None:
+        doc["max_delegations"] = a.max_delegations
+    save(doc, "init", f"tier={tier} claims={len(claims)} "
+                      f"max_delegations={a.max_delegations}")
+    print(f"OK init  tier={tier}  sensor={doc['sensor_mode']}  claims={len(claims)}"
+          + (f"  max_delegations={a.max_delegations}" if a.max_delegations is not None else ""))
     return 0
 
 
@@ -321,6 +325,70 @@ def orphan_strong(claim: dict) -> list[str]:
     return missing
 
 
+def count_delegations() -> tuple[int | None, str]:
+    """委譲回数を hook の実ログから数える。(件数, 注記) を返す。
+
+    Lean 方針（jen-classic）の支配的なコストは委譲回数である。サブエージェントは
+    呼び出しごとにまっさらなコンテキストで始まるので、1回の委譲が1つのコンテキスト
+    ウィンドウを丸ごと使う。トークン数は Jen の内側から見えないが、委譲回数は
+    `post_tool_log.py` の実ログから数えられる（自己申告ではない）。
+
+    **正直な限界**: PostToolUse のペイロードに委譲先のツール名が含まれるかは
+    ハーネスの実装依存で、Jen 側では検証していない。数えられないときは
+    None を返し「判定不能」と言う。**黙って 0 とは言わない。**
+    """
+    log = Path(".jen/logs/tool-events.jsonl")
+    if not log.is_file():
+        return None, "判定不能: .jen/logs/tool-events.jsonl が無い（post_tool_log.py 未稼働か）"
+    delegations = 0
+    recognized = 0
+    total = 0
+    for line in log.read_text(encoding="utf-8", errors="replace").splitlines():
+        if not line.strip():
+            continue
+        total += 1
+        try:
+            entry = json.loads(line)
+        except Exception:
+            continue
+        data = entry.get("data") or {}
+        name = ""
+        for key in ("tool_name", "tool", "toolName", "name"):
+            val = data.get(key) if isinstance(data, dict) else None
+            if isinstance(val, str) and val:
+                name = val
+                break
+        if not name:
+            continue
+        recognized += 1
+        if name.lower() in ("agent", "task"):
+            delegations += 1
+    if recognized == 0:
+        return None, (f"判定不能: {total} 行あるがツール名を読めない"
+                      "（PostToolUse のスキーマが想定と違う）")
+    return delegations, f"{recognized}/{total} 行からツール名を読めた"
+
+
+def cmd_budget(a) -> int:
+    """資源（委譲回数）の消費を実ログから報告する。強制停止はしない."""
+    doc = load()
+    limit = doc.get("max_delegations")
+    used, note = count_delegations()
+    print(f"tier={doc.get('tier')}  sensor={doc.get('sensor_mode')}  "
+          f"上限={limit if limit is not None else '未設定'}")
+    print(f"委譲回数: {used if used is not None else '—'}   （{note}）")
+    if used is None or limit is None:
+        return 0
+    if used > limit:
+        # v3.4 以来の不変条件どおり、数値による hard-stop はしない。
+        # 「この分解は重すぎたのではないか」の自己点検シグナルとして返す。
+        print(f"⚠️ 上限超過 ({used} > {limit})。強制停止はしない。"
+              "分解が重すぎた可能性を点検し .jen/decisions.md に一行残すこと。",
+              file=sys.stderr)
+        return 1
+    return 0
+
+
 def report(doc: dict) -> tuple[list[str], bool]:
     lines, ok = [], True
     tainted = bool(doc.get("_seal_broken"))
@@ -383,6 +451,8 @@ def main() -> int:
     s.add_argument("--claim", action="append", help="'C1=主張の文' 形式。複数可")
     s.add_argument("--tier", default="sonnet", choices=sorted(TIER_SENSOR))
     s.add_argument("--require", default="medium", choices=sorted(STRENGTH))
+    s.add_argument("--max-delegations", type=int, default=None, dest="max_delegations",
+                   help="委譲回数の上限（Lean 方針。超過しても強制停止はしない）")
     s.add_argument("--force", action="store_true")
     s.set_defaults(fn=cmd_init)
 
@@ -418,6 +488,9 @@ def main() -> int:
     s = sub.add_parser("status", help="被覆状況を表示（全MATCHで exit 0）")
     s.add_argument("--json", action="store_true")
     s.set_defaults(fn=cmd_status)
+
+    s = sub.add_parser("budget", help="資源（委譲回数）の消費を実ログから報告する")
+    s.set_defaults(fn=cmd_budget)
 
     s = sub.add_parser("gate", help="完了可否の決定論的判定（Stop hook 用）")
     s.set_defaults(fn=cmd_gate)

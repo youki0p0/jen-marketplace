@@ -1,7 +1,7 @@
 {
   "name": "jen-classic",
   "version": "4.0.0",
-  "description": "Jen v3 Classic Edition — same PMO orchestration on Opus 5.5 (no Fable required). Compensates Fable's long-horizon strength with re-anchoring, session rotation, and opus council escalation.",
+  "description": "Jen Lean Edition — the same outcome for fewer resources. Runs single-agent by default and delegates only when one agent's effective context would degrade (Tran & Kiela 2026); starts at haiku, escalates on measured REJECT, counts delegations from the hook log. No Fable required. Do not enable alongside jen.",
   "author": {
     "name": "Yuukinosh",
     "url": "https://github.com/youki0p0"
