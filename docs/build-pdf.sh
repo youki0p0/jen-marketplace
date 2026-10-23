@@ -47,20 +47,38 @@ EOF
   exit 1
 fi
 
+# 止める線は warn と critical まで。info は表示するだけで止めない。
+# lint 自身が「CI ゲートではない」と書いており、info は
+# 「人間が意図した技法と区別できない参考情報」として出している。
+# 例えば low_lexical_diversity_ttr は、用語をそろえた技術文書では必ず出る。
+# これで止めると、直し方が「語を言い換えて散らす」ことになり、
+# スキルが禁じている方向（用語は同じ語にそろえたままでよい）に押される。
 echo "— lint: $SRC"
-if ! "$PY" "$LINT" --genre tech "$SRC" > /tmp/nj-lint.$$ 2>&1; then
-  sed -n '1,40p' /tmp/nj-lint.$$ >&2; rm -f /tmp/nj-lint.$$
+if ! "$PY" "$LINT" --genre tech --json "$SRC" > /tmp/nj-lint.$$ 2>/tmp/nj-err.$$; then
+  sed -n '1,40p' /tmp/nj-err.$$ >&2; rm -f /tmp/nj-lint.$$ /tmp/nj-err.$$
   echo "lint が失敗した。PDF は作らない。" >&2; exit 1
 fi
-if ! grep -q "^検出なし。" /tmp/nj-lint.$$; then
-  sed -n '1,60p' /tmp/nj-lint.$$ >&2
-  rm -f /tmp/nj-lint.$$
-  echo >&2
-  echo "指摘が残っている。直してから作り直す。" >&2
-  echo "（事実や確信の度合いは変えない。言い回しだけを直す）" >&2
-  exit 1
-fi
-sed -n '1,3p' /tmp/nj-lint.$$; rm -f /tmp/nj-lint.$$
+"$PY" - /tmp/nj-lint.$$ <<'PYEOF' || { rm -f /tmp/nj-lint.$$ /tmp/nj-err.$$; exit 1; }
+import json, sys
+with open(sys.argv[1], encoding="utf-8") as fp:
+    d = json.load(fp)
+# 形が変わったら黙って通さず止める。findings が読めないゲートは、通すゲートと同じ。
+assert isinstance(d.get("findings"), list), "lint の JSON に findings が無い"
+blocking = [f for f in d["findings"] if f["severity"] in ("warn", "critical")]
+advisory = [f for f in d["findings"] if f["severity"] == "info"]
+for f in advisory:
+    print(f"  参考 L{f['line']} {f['category']}: {f['excerpt'][:60]}")
+for f in blocking:
+    print(f"\n[{f['severity']}] L{f['line']} ({f['category']})", file=sys.stderr)
+    print(f"    該当: {f['excerpt'][:70]}", file=sys.stderr)
+    print(f"    直し方: {f['hint']}", file=sys.stderr)
+if blocking:
+    print(f"\nwarn 以上が {len(blocking)} 件ある。直してから作り直す。", file=sys.stderr)
+    print("（事実や数値や確信の度合いは変えない。言い回しだけを直す）", file=sys.stderr)
+    sys.exit(1)
+print(f"  warn 以上なし（参考 {len(advisory)} 件）")
+PYEOF
+rm -f /tmp/nj-lint.$$ /tmp/nj-err.$$
 
 # ---- 2. Markdown -> docx -> A4 -> PDF -------------------------------------
 W=$(mktemp -d); trap 'rm -rf "$W"' EXIT
