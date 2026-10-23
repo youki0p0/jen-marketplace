@@ -143,6 +143,8 @@ Acceptance Criteria:
 - **[docs/jen-v4-design.pdf](docs/jen-v4-design.pdf)** — v4 設計思想（日本語・9ページ）。出典つき。何を測っていないかも書いてあります
 - [docs/jen-v3-usage-guide.pdf](docs/jen-v3-usage-guide.pdf) — v3 のガイド（完了判定の記述は v4 で古くなっています）
 
+日本語の PDF は `docs/build-pdf.sh` で作ります。ビルドの前に [natural-japanese](https://github.com/coji/natural-japanese) の lint を通し、指摘が残っていると PDF を作りません。書いた本人は自分の文章の癖に気づけないので、検出を機械に任せています。
+
 ## 中身の透明性（インストール前に読んでほしい）
 
 サードパーティのスキル/プラグインは中身を確認してから入れるのが原則です。Jen は全部読めます：
