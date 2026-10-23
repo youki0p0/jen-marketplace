@@ -1,27 +1,27 @@
 #!/usr/bin/env python3
 """Jen v4 — 証拠台帳（Evidence Ledger）.
 
-受入条件を K 個の atomic な「主張」に分解し、主張ごとに**単調非減少**の状態
-（NULL → PARTIAL → MATCH）を持つ。全主張が MATCH になるまで完了を認めない。
-**判定はモデル、合成は決定論**。
+受入条件を、1つずつ独立に確かめられる「項目」に割り、項目ごとに**下がらない**状態
+（NULL → PARTIAL → MATCH）を持つ。全項目が MATCH になるまで完了を認めない。
+**1件ずつの判断はモデルに聞き、全部そろったかの集計はプログラムがやる**。
 
 ## 設計の出典（すべて `.jen/` 外の一次情報・research/ 参照）
 
-- 停止を「確信度」ではなく「主張ごとの証拠被覆」で決める:
+- 停止を「確信度」ではなく「項目ごとに証拠がそろったか」で決める:
   HALT (Roh & Han 2026, arXiv 2608.02009) 「We frame stopping as evidence coverage
-  rather than generator confidence」。主張ごとの running max と ALL_MATCH 則もここ。
+  rather than generator confidence」。状態が下がらないことと ALL_MATCH 則もここ。
 - 証拠は「文字列」では足りない: コキエ 2026-03 の実験。Stop Hook が出力中の
   `<proof>...</proof>` を見ていたため、モデルはその文字列を出力するだけで通した。
   → 強度を3段階に分け、**強い証拠は台帳が自分で実行して得たものだけ**とする。
-- センサーを連続で回すか最終ゲート1回に畳むかはモデル能力で決める:
+- 検証を工程ごとに走らせるか最後の1回にまとめるかは、モデルの性能で決める:
   Jain 2026-10「What changes with model capability is not whether independent sensors
   are needed, but when they run」／Anthropic 2026-03「moved the evaluator to a single
   pass at the end of the run」（Opus 4.6 で sprint 構造を削除した際の判断）。
-- 問いが変われば被覆は引き継がない: Bates 1989（berrypicking）。`revise` が担う。
+- 受入条件が変われば証拠は引き継がない: Bates 1989（berrypicking）。`revise` が担う。
 
 ## この部品が前提している「モデルの不足」（P9）
 
-1. モデルは**自分の被覆を過大評価する**（＝早すぎる完了宣言）。
+1. モデルは**自分が終わったかどうかを甘く見積もる**（＝早すぎる完了宣言）。
 2. モデルは**弱い証拠を強い証拠と見なす**。
 3. モデルは**ゲートを通すために証拠を偽造する**（コキエの実験で実証済み）。
 
@@ -74,7 +74,7 @@ except Exception:  # 共有ガードが無い環境では run を使わせない
 LEDGER = Path(".jen/claims.json")
 STRENGTH = {"weak": 1, "medium": 2, "strong": 3}
 STATES = {"NULL": 0, "PARTIAL": 1, "MATCH": 2}
-# 階層 → センサーの走らせ方。Jain / Anthropic の収束点。
+# 使うモデル → 検証の走らせ方。Jain / Anthropic が別々に同じ結論へ達した点。
 # fable は opus と同扱い（ユーザー判断 2026-10: 現状の性能では優先度が低い）。
 TIER_SENSOR = {
     "haiku": "continuous",
@@ -129,7 +129,7 @@ def die(msg: str, code: int = 1):
 
 
 def recompute(claim: dict) -> str:
-    """主張の状態を証拠から再計算する。単調非減少（下がらない）。"""
+    """項目の状態を証拠から計算し直す。状態は上がるだけで、下がらない。"""
     best = 0
     for ev in claim.get("evidence", []):
         if not ev.get("satisfied"):
@@ -144,7 +144,7 @@ def recompute(claim: dict) -> str:
 def get_claim(doc: dict, cid: str) -> dict:
     claim = doc.get("claims", {}).get(cid)
     if claim is None:
-        die(f"主張 {cid} が台帳に無い。既存: {', '.join(doc.get('claims', {})) or '(なし)'}")
+        die(f"項目 {cid} が台帳に無い。既存: {', '.join(doc.get('claims', {})) or '(なし)'}")
     return claim
 
 
@@ -165,11 +165,11 @@ def cmd_init(a) -> int:
             except Exception as exc:
                 die(f"stdin の JSON を読めない: {exc}")
     if not raw:
-        die("主張が空。--claim 'C1=...' か、stdin に [{\"id\":..,\"text\":..}] を渡す。")
+        die("項目が空。--claim 'C1=...' か、stdin に [{\"id\":..,\"text\":..}] を渡す。")
     for item in raw:
         cid = str(item.get("id", "")).strip()
         if not ID_RE.match(cid):
-            die(f"主張IDが不正: {cid!r}")
+            die(f"項目IDが不正: {cid!r}")
         req = item.get("require", a.require)
         if req not in STRENGTH:
             die(f"require が不正: {req!r}（weak|medium|strong）")
@@ -193,9 +193,9 @@ def cmd_init(a) -> int:
 def cmd_claim_add(a) -> int:
     doc = load()
     if not ID_RE.match(a.id):
-        die(f"主張IDが不正: {a.id!r}")
+        die(f"項目IDが不正: {a.id!r}")
     if a.id in doc.get("claims", {}):
-        die(f"主張 {a.id} は既にある")
+        die(f"項目 {a.id} は既にある")
     doc["claims"][a.id] = {"text": a.text, "require": a.require, "state": "NULL", "evidence": []}
     save(doc, "claim-add", f"{a.id} require={a.require}")
     print(f"OK claim-add  {a.id}  require={a.require}")
@@ -286,7 +286,7 @@ def cmd_run(a) -> int:
 
 
 def cmd_revise(a) -> int:
-    """問いが変わったときに版を切る。**被覆は引き継がない**（Bates 1989）."""
+    """受入条件が変わったときに新しい版へ切り替える。**証拠は引き継がない**（Bates 1989）."""
     doc = load()
     old = doc.get("mission_rev", 1)
     doc["mission_rev"] = old + 1
@@ -294,7 +294,7 @@ def cmd_revise(a) -> int:
         claim["state"] = "NULL"
         claim["evidence"] = []
     save(doc, "revise", f"rev {old} -> {old + 1}: {a.note}")
-    print(f"OK revise  rev {old} -> {old + 1}  （全主張の被覆をリセットした）")
+    print(f"OK revise  rev {old} -> {old + 1}  （全項目の証拠を消した）")
     return 0
 
 
@@ -370,7 +370,7 @@ def count_delegations() -> tuple[int | None, str]:
 
 
 def cmd_budget(a) -> int:
-    """資源（委譲回数）の消費を実ログから報告する。強制停止はしない."""
+    """ほかのエージェントに任せた回数を、実ログから数えて報告する。強制停止はしない."""
     doc = load()
     limit = doc.get("max_delegations")
     used, note = count_delegations()
@@ -430,16 +430,16 @@ def cmd_status(a) -> int:
 
 
 def cmd_gate(a) -> int:
-    """完了を許すかの決定論的判定。Stop hook がこれを使う。"""
+    """完了を許してよいかを判定する。判断に LLM は関与しない。Stop hook がこれを使う。"""
     if not LEDGER.exists():
-        print("JEN_GATE: 台帳が無い（主張が宣言されていない）", file=sys.stderr)
+        print("JEN_GATE: 台帳が無い（項目が宣言されていない）", file=sys.stderr)
         return 2
     doc = load()
     lines, ok = report(doc)
     if ok:
         print("JEN_GATE_PASS  " + lines[0])
         return 0
-    print("JEN_GATE_BLOCK  未被覆の主張がある\n" + "\n".join(lines), file=sys.stderr)
+    print("JEN_GATE_BLOCK  証拠が足りない項目がある\n" + "\n".join(lines), file=sys.stderr)
     return 2
 
 
@@ -448,7 +448,7 @@ def main() -> int:
     sub = p.add_subparsers(dest="cmd", required=True)
 
     s = sub.add_parser("init", help="台帳を作る")
-    s.add_argument("--claim", action="append", help="'C1=主張の文' 形式。複数可")
+    s.add_argument("--claim", action="append", help="'C1=項目の文' 形式。複数可")
     s.add_argument("--tier", default="sonnet", choices=sorted(TIER_SENSOR))
     s.add_argument("--require", default="medium", choices=sorted(STRENGTH))
     s.add_argument("--max-delegations", type=int, default=None, dest="max_delegations",
@@ -456,7 +456,7 @@ def main() -> int:
     s.add_argument("--force", action="store_true")
     s.set_defaults(fn=cmd_init)
 
-    s = sub.add_parser("claim-add", help="主張を足す")
+    s = sub.add_parser("claim-add", help="項目を足す")
     s.add_argument("--id", required=True)
     s.add_argument("--text", required=True)
     s.add_argument("--require", default="medium", choices=sorted(STRENGTH))
@@ -477,22 +477,22 @@ def main() -> int:
     s.add_argument("--detail")
     s.set_defaults(fn=cmd_run)
 
-    s = sub.add_parser("revise", help="問いが変わった。版を切り被覆をリセットする")
+    s = sub.add_parser("revise", help="受入条件が変わった。新しい版に切り替え、証拠を消す")
     s.add_argument("--note", required=True)
     s.set_defaults(fn=cmd_revise)
 
-    s = sub.add_parser("tier", help="モデル階層を設定し、センサーの走らせ方を決める")
+    s = sub.add_parser("tier", help="使うモデルを設定し、検証の走らせ方を決める")
     s.add_argument("--set", required=True)
     s.set_defaults(fn=cmd_tier)
 
-    s = sub.add_parser("status", help="被覆状況を表示（全MATCHで exit 0）")
+    s = sub.add_parser("status", help="どの項目に証拠がそろったかを表示（全MATCHで exit 0）")
     s.add_argument("--json", action="store_true")
     s.set_defaults(fn=cmd_status)
 
-    s = sub.add_parser("budget", help="資源（委譲回数）の消費を実ログから報告する")
+    s = sub.add_parser("budget", help="ほかのエージェントに任せた回数を、実ログから数える")
     s.set_defaults(fn=cmd_budget)
 
-    s = sub.add_parser("gate", help="完了可否の決定論的判定（Stop hook 用）")
+    s = sub.add_parser("gate", help="完了していいかを判定する（Stop hook 用。止めるときは exit 2）")
     s.set_defaults(fn=cmd_gate)
 
     a = p.parse_args()

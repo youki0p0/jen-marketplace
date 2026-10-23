@@ -85,7 +85,7 @@ Jenというシステム自身の地図。
 - `.jen/logs/stop-events.jsonl`（`stop_append_summary.py`, Stop hook）
 
 これらはLLMの協力に依存しない、Jenで数少ない「本物」のログである
-（PreToolUseガードと同じ、hooksによる決定論的な記録）。
+（PreToolUseガードと同じ、hooks による機械的な記録）。
 > 注意（未確認）: PostToolUseのペイロードの正確なスキーマはClaude Code
 > ハーネス側の仕様に依存し、Jen側では検証していない。Task tool呼び出し
 > （subagent委譲）の`tool_input`に`subagent_type`や委譲prompt本文が

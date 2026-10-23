@@ -33,14 +33,14 @@
 
 | 機構 | 判定 | 理由 |
 |---|---|---|
-| HALT の停止則（主張の証拠被覆・running max・ALL_MATCH） | **採る** | 構造だけ移植。合成は Python |
+| HALT の停止の決め方（項目ごとに証拠がそろったか・状態が下がらない・ALL_MATCH） | **採る** | 考え方だけ移す。集計は Python |
 | HALT の検証器 Vθ（Qwen2.5-3B + LoRA） | **✗** | 他社モデルに判断させる＋要学習 |
 | ブラウザ自動化での検収（Puppeteer / Playwright MCP） | **✓** | Claude 内から実行できる。ただし必須化しない |
 | Sakana Fugu（オーケストレーションをモデルに内蔵） | **✗** | Claude でないモデル |
 | Sakana Trinity / Conductor（学習した指揮者） | **✗** | 要学習 |
 | Sakana DGM / MASS（再帰的自己改善） | **✗** | モデル改変 |
 | Meta-Harness / AutoHarness（ハーネス自動探索） | **✗** | 要学習 |
-| 階層別センサー（Jain / Anthropic） | **採る** | `model:` エイリアスが分岐キーになる |
+| モデル別の検証頻度（Jain / Anthropic） | **採る** | `model:` エイリアスが分岐キーになる |
 
 Sakana 系が全滅する点について: Jen v1 は Sakana Fugu 型のルーティング思想から
 出発したが、2026年の Fugu は「オーケストレーションをモデルの中に入れる」方向へ行った。
