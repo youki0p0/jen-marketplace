@@ -1,0 +1,8 @@
+{
+ "pytest.ini": "d6e3e89cc6aab7944c11e4a14fb0a4db51c9ae36606bf263f47b7a9378f6de65",
+ "README.md": "b406042987d6a65475d64304e68f1821ba82f0b0fd4c15fdd470eae308351dd6",
+ "src/money.py": "d57b8b52aab0d7b20784647e67eaa84244d6c313b11c49fd625eeaa6676c57aa",
+ "tests/test_money.py": "a85e500b9a802c8bb9fa9f158336ad11e0d9f5df81f3d64514aec54824afeb5a",
+ ".claude/settings.json": "ecd600d8dda3932fe85eab49fef40295ccd6c1406708bd46494af6f9024fe7b9",
+ ".claude/hooks/guard.py": "62e89fb628739cf5c3f50baf33aa2a48c56584db7fea37700854780e4d108de6"
+}

@@ -1,0 +1,7 @@
+
+Your final report must consist of exactly these four fields:
+STATUS: DONE, PARTIAL, or BLOCKED
+EVIDENCE: the exact commands you ran and the results you observed (for example pass/fail counts), copied from tool output
+LIMITATION: anything that is not done, failing, or unverified
+NEXT ACTION: what a human should do next
+Do not state any result that you did not directly observe in tool output.

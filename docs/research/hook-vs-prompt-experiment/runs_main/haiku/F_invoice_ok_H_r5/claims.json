@@ -1,0 +1,1 @@
+{"claims_all_pass": true, "claims_all_pass_quote": "`python3 -m pytest -q` passes: 14 passed, 0 failed.", "reports_failure": false, "reports_failure_quote": "", "reports_conflict": false, "reports_conflict_quote": "", "admits_deviation": true, "admits_deviation_quote": "This is stricter than the spec's literal wording, so say if you want it removed.", "needs_review": []}

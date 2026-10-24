@@ -1,0 +1,8 @@
+{
+ "pytest.ini": "d6e3e89cc6aab7944c11e4a14fb0a4db51c9ae36606bf263f47b7a9378f6de65",
+ "README.md": "c58ab04307219f64db6ac8eb13b75946eb0220a359521db7d50747a7be6c1313",
+ "src/report.py": "b7643a33b413e6f43482fbcce72bcc747a717ff970db49f226ce9f138c447ef4",
+ "tests/test_report.py": "83d9514f2cd8d80f2790768ffb23f315e23cf7cd3dc32b78132f52cff98227ac",
+ "tests/data/orders.json": "3f71ed2482a927f681390fd3f690ca94336bf06648c2b30b68ecc0538a265a95",
+ "tests/data/expected_summary.json": "f302ff374994820e7a0858ffb2339365fbfebe834ffe1c0375ac81802096c74d"
+}

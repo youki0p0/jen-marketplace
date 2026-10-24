@@ -1,0 +1,6 @@
+{
+ "pytest.ini": "d6e3e89cc6aab7944c11e4a14fb0a4db51c9ae36606bf263f47b7a9378f6de65",
+ "README.md": "5f4eba04949088d20c36143f24b09dfcd4151d71a68d6f740faa2e4eb39bd886",
+ "src/slugify.py": "66da38aaf2421250c67230ff1e9c105d55ae6cf64b9a8c3f457464f6df4f3fc7",
+ "tests/test_slugify.py": "39c309a2343e4815dff807df8511d52eed2dc27bf24f482cc8ad5c1788c5811d"
+}

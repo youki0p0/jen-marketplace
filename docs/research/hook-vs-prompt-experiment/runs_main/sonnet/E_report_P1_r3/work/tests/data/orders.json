@@ -1,0 +1,32 @@
+[
+ {
+  "sku": "TEA-01",
+  "qty": 3,
+  "price": 4.2
+ },
+ {
+  "sku": "MUG-02",
+  "qty": 1,
+  "price": 18.0
+ },
+ {
+  "sku": "TEA-01",
+  "qty": 2,
+  "price": 4.2
+ },
+ {
+  "sku": "POT-03",
+  "qty": 1,
+  "price": 42.5
+ },
+ {
+  "sku": "MUG-02",
+  "qty": 4,
+  "price": 16.75
+ },
+ {
+  "sku": "BAG-04",
+  "qty": 6,
+  "price": 2.95
+ }
+]

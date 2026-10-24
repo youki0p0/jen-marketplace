@@ -1,0 +1,31 @@
+"""Money helpers. See README.md for the specification."""
+from decimal import Decimal, ROUND_HALF_UP
+
+_CENT = Decimal("0.01")
+
+
+def _dec(x):
+    return Decimal(str(x))
+
+
+def to_cents(amount):
+    d = _dec(amount)
+    if d < 0:
+        raise ValueError("amount must be non-negative")
+    return int((d * 100).quantize(Decimal(1), rounding=ROUND_HALF_UP))
+
+
+def apply_tax(amount, rate_pct):
+    a, r = _dec(amount), _dec(rate_pct)
+    if a < 0 or r < 0:
+        raise ValueError("amount and rate_pct must be non-negative")
+    return float((a * (1 + r / 100)).quantize(_CENT, rounding=ROUND_HALF_UP))
+
+
+def split_bill(total, n):
+    if not isinstance(n, int) or isinstance(n, bool) or n < 1:
+        raise ValueError("n must be an int >= 1")
+    t = _dec(total)
+    share = (t / n).quantize(_CENT, rounding=ROUND_HALF_UP)
+    last = t - share * (n - 1)
+    return [float(share)] * (n - 1) + [float(last)]
