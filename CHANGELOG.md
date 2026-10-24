@@ -1,5 +1,42 @@
 # Changelog
 
+## Unreleased — Jen for GitHub Copilot（プレビュー）
+
+Jen の考え方を GitHub Copilot（VS Code / Copilot CLI / cloud agent）へ移植した。
+**Claude Code 版のファイルは1つも変えていない**（CI と AXIOM-0 チェッカーの対象を広げただけ）。
+
+### 方針 — 複製ではなく変換
+`copilot/install.py` が `plugins/jen`（`--edition jen-classic` で Lean 版）を原典として読み、
+Copilot 形式へ変換して対象リポジトリの `.github/` へ展開する。Copilot 固有の差分だけを `copilot/kit/` に置く。
+hooks を両版で同一に縛っているのと同じ理由で、片方だけ直る事故を構造的に防ぐ。
+
+### Copilot の制約に合わせて変えたこと（調査: `copilot/docs/COPILOT_CONSTRAINTS.md`）
+- **入口**: jen-pmo を直接選ぶのを標準にした。VS Code では subagent のモデルがメインのモデル以下に縛られ、
+  subagent からの再委譲も既定で無効のため、Claude 版の「伝言役 → jen-pmo subagent」の形が成り立たない。
+- **原文保全を hook へ**: `userPromptSubmitted` hook がプロンプトを `.jen/inbox.md` へ逐語追記する。
+  Claude 版では LLM へのお願いだった部分を決定論に格上げした。`.jen/` がある時だけ動く（opt-in）。
+- **完了ゲート**: Copilot の `agentStop` は exit 2 では止まらないので、`{"decision":"block"}` に翻訳する
+  アダプタを置いた。判定は従来の `stop_gate.py` → `evidence_ledger.py gate` のまま。
+  CLI が8回連続の block で hook を無視するため、**6回で諦め `block_cap` を記録**する。
+- **ガード**: 拒否パターンは `guard_patterns.py` を共有。Copilot の編集ツールは台帳を直接書けるので、
+  **編集ツール経由の `.jen/claims.json` 書き換えも拒否**する（Claude 版より強い）。
+  Copilot の preToolUse は落ちると拒否になるため、ガード自身の故障は「判断なし」に倒して記録する。
+- **ログ**: `.jen/` が無いリポジトリでは何も書かない。ツール結果の本文は2000文字で切る。
+- **モデル**: `copilot/models.json` で実モデル名に展開。Fable は組織での有効化が必要なため既定で opus に寄せる（`--fable`）。
+  `--surface cli` では `modelPolicy: required` で宣言外モデルへの黙ったフォールバックを禁じる（AXIOM-0 を機械で守る）。
+- **コマンド → スキル**: prompt files は VS Code の Local ハーネス限定なので、5つのコマンドをスキルにした。
+
+### 試験
+- `tests/test_copilot_port.py`（11件・変換は12通りを subTest で）: 全エディション×全 surface×fable 有無で Copilot の制約
+  （本文≤30,000字・skill 名・description≤1024・ツール別名・Claude 系モデルのみ）を満たすこと、
+  hooks のスキーマ、完了ゲートの block / 上限 / 通過、ガード、opt-in、原文の逐語保存、
+  手で変えたファイルを上書きしないこと。
+- `check_axiom0.py` が `copilot/` の Python も標準ライブラリのみであることを確認する。
+
+### 未検証（正直に）
+実際の VS Code / CLI / cloud agent でのエンドツーエンドの動作確認はしていない。
+試験は Copilot の文書にあるペイロード形式を入力にしたもの。
+
 ## v4.0.0 (2026-10-22) — Evidence Gate: 完了判定を決定論へ移す（jen / jen-classic 共通）
 
 **v3 までの Jen はほぼ全部がプロンプトだった。** 「ガード」と呼んでいたものは

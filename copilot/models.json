@@ -1,0 +1,20 @@
+{
+  "_comment": "Jen のモデル階層（haiku/sonnet/opus/fable）を Copilot のモデル名へ展開する対応表。install.py が読む。世代が変わったらここだけ直す。",
+  "_verified": "id 形式は Copilot CLI リファレンス（2026-10-24 時点）の一覧で確認。claude-fable-5.1 の ID と vscode 形式の表示名は未確認（推定）。",
+  "id": {
+    "haiku": "claude-haiku-5.5",
+    "sonnet": "claude-sonnet-5.5",
+    "opus": "claude-opus-5.5",
+    "fable": "claude-fable-5.1"
+  },
+  "vscode": {
+    "haiku": "Claude Haiku 5.5",
+    "sonnet": "Claude Sonnet 5.5",
+    "opus": "Claude Opus 5.5",
+    "fable": "Claude Fable 5.1"
+  },
+  "fallback": {
+    "fable": "opus"
+  },
+  "_fallback_note": "fallback は --fable 指定時にだけ使う（fable が使えない環境で opus に落とす）。opus→sonnet のような降格は昇格ラダーの意味を壊すので置かない。"
+}

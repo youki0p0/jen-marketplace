@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "hooks": {
+    "userPromptSubmitted": [
+      {
+        "type": "command",
+        "bash": "python3 .github/hooks/jen/copilot_inbox_capture.py",
+        "powershell": "python .github/hooks/jen/copilot_inbox_capture.py",
+        "cwd": ".",
+        "timeoutSec": 10
+      }
+    ],
+    "preToolUse": [
+      {
+        "type": "command",
+        "bash": "python3 .github/hooks/jen/copilot_pre_tool_guard.py",
+        "powershell": "python .github/hooks/jen/copilot_pre_tool_guard.py",
+        "cwd": ".",
+        "timeoutSec": 10
+      }
+    ],
+    "postToolUse": [
+      {
+        "type": "command",
+        "bash": "python3 .github/hooks/jen/copilot_post_tool_log.py",
+        "powershell": "python .github/hooks/jen/copilot_post_tool_log.py",
+        "cwd": ".",
+        "timeoutSec": 10
+      }
+    ],
+    "agentStop": [
+      {
+        "type": "command",
+        "bash": "python3 .github/hooks/jen/copilot_stop_gate.py",
+        "powershell": "python .github/hooks/jen/copilot_stop_gate.py",
+        "cwd": ".",
+        "timeoutSec": 60
+      }
+    ]
+  }
+}
