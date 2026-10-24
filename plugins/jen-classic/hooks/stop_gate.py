@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Jen v4 — 完了ゲート（Stop hook）.
 
-セッションが終わろうとするとき、証拠台帳（`.jen/claims.json`）の被覆を見て
-**全主張が MATCH でなければ完了を認めない**（exit 2 で差し戻す）。
+セッションが終わろうとするとき、証拠台帳（`.jen/claims.json`）を見て
+**全項目が MATCH でなければ完了を認めない**（exit 2 で差し戻す）。
 
-判断は決定論。LLM に「終わっていいか」を聞かない。
+判断はプログラムがやる。LLM に「終わっていいか」を聞かない。
 出典は `evidence_ledger.py` の docstring（HALT / Jain / Anthropic / コキエ）。
 
 ## 台帳が無いセッションをどう扱うか（設計上の妥協・明示する）
@@ -15,7 +15,7 @@
 ただし「台帳を作らなければゲートを回避できる」という穴が残る。これを塞ぐ代わりに、
 **ゲート無しで終わったことを必ず記録する**（`.jen/logs/stop-events.jsonl` の
 `gated: false`）。行動監査（`/jen:jen-audit`）がこれを拾えるので、
-「主張を宣言せずに完了した回数」は事後に数えられる。
+「項目を宣言せずに完了した回数」は、あとから数えられる。
 穴を黙って残すのではなく、見えるようにしてから残している。
 
 ## この部品が前提している「モデルの不足」（P9）
@@ -25,7 +25,7 @@
 and declare [the project complete]」/ effective-harnesses-for-long-running-agents）。
 MAST(2503.13657) の14失敗モードにも「早すぎる終了」「検証しない」が入っている。
 
-この前提が外れたら（モデルが被覆を正しく自己申告するようになったら）、
+この前提が外れたら（モデルが、終わったかどうかを正しく申告するようになったら）、
 `sensor_mode: final_gate` のまま最終1回だけにし、最後は hooks から外してよい。
 
 標準ライブラリのみ。
@@ -61,7 +61,7 @@ def main() -> int:
         pass  # ペイロードは使わない。読み捨てて続ける
 
     if not LEDGER.exists():
-        # 主張が宣言されていないミッション。塞がないが、必ず記録する（上の注記参照）。
+        # 項目が宣言されていないミッション。止めないが、必ず記録する（上の注記参照）。
         record({"event": "Stop", "gated": False, "reason": "no_ledger"})
         return 0
 
@@ -102,10 +102,10 @@ def main() -> int:
     sys.stderr.write(proc.stderr or proc.stdout)
     sys.stderr.write(
         "\n--- 完了を認めない。次のどれかをする ---\n"
-        "1. 未被覆の主張に強い証拠を付ける:\n"
+        "1. 証拠が足りない項目に、強い証拠を付ける:\n"
         "   python3 ${CLAUDE_PLUGIN_ROOT}/hooks/evidence_ledger.py run "
         "--claim <ID> --cmd '<検証コマンド>'\n"
-        "2. 主張そのものが間違っていた場合は、人間に確認してから版を切る:\n"
+        "2. 受入条件そのものが間違っていた場合は、人間に確認してから版を切り替える:\n"
         "   python3 ${CLAUDE_PLUGIN_ROOT}/hooks/evidence_ledger.py revise --note '<理由>'\n"
         "3. 解けない場合は Human Gate として、何ができて何で止まったかを報告する。\n"
         "   ゲート自体を切るのは人間の判断（.jen/claims.json の \"gate\": \"off\"）。\n")

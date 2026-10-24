@@ -137,7 +137,13 @@ Acceptance Criteria:
 | `release` | PR 要約・検証パケット・ロールバック。deploy は人間承認で停止 |
 | `longrun` | チェックポイントと品質ゲートを挟み完了まで自走 |
 
-詳しくは [docs/jen-v3-usage-guide.pdf](docs/jen-v3-usage-guide.pdf)（日本語・7ページ）へ。
+詳しくは次へ：
+
+- **[docs/jen-v4-usage.pdf](docs/jen-v4-usage.pdf)** — v4 使い方ガイド（日本語・5ページ）。v3 からの変更点、証拠ゲートの使い方。**掲載しているコマンド例は CI が実際に実行して検証しています**
+- **[docs/jen-v4-design.pdf](docs/jen-v4-design.pdf)** — v4 設計思想（日本語・9ページ）。出典つき。何を測っていないかも書いてあります
+- [docs/jen-v3-usage-guide.pdf](docs/jen-v3-usage-guide.pdf) — v3 のガイド（完了判定の記述は v4 で古くなっています）
+
+日本語の PDF は `docs/build-pdf.sh` で作ります。ビルドの前に [natural-japanese](https://github.com/coji/natural-japanese) の lint を通し、指摘が残っていると PDF を作りません。書いた本人は自分の文章の癖に気づけないので、検出を機械に任せています。
 
 ## 中身の透明性（インストール前に読んでほしい）
 

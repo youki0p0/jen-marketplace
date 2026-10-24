@@ -66,6 +66,12 @@ jobs:
         run: |
           python -m compileall -q plugins/jen/hooks plugins/jen-classic/hooks
 
+      # ドキュメントに書いたコマンド例を実際に実行する。
+      # 走らせないなら「動きます」という記述はエージェントの自己申告であり、
+      # v4 自身が weak と分類する証拠にすぎない。
+      - name: ドキュメントのコマンド例が実際に動くか
+        run: python tests/verify_doc_examples.py docs/jen-v4-usage.md
+
       - name: 状態ファイルがコミットされていないこと
         run: |
           if git ls-files --error-unmatch .jen 2>/dev/null; then
