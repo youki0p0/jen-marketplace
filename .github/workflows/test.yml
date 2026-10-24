@@ -62,9 +62,9 @@ jobs:
       - name: AXIOM-0 チェック
         run: python tests/check_axiom0.py
 
-      - name: hooks が構文として妥当か（両版）
+      - name: hooks が構文として妥当か（両版＋Copilot版）
         run: |
-          python -m compileall -q plugins/jen/hooks plugins/jen-classic/hooks
+          python -m compileall -q plugins/jen/hooks plugins/jen-classic/hooks copilot
 
       - name: 状態ファイルがコミットされていないこと
         run: |

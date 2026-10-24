@@ -11,6 +11,7 @@
   3. `plugin.json` / `marketplace.json` が妥当な JSON で、版が一致しているか
   4. `plugin.json` が参照する hook ファイルが実在するか
   5. 両エディションの hooks が同一か（**意図的に同一**。片方だけ直す事故を防ぐ）
+  6. Copilot 版（`copilot/`）のインストーラとアダプタも標準ライブラリのみか
 
 標準ライブラリのみ。`python3 tests/check_axiom0.py` で単体でも走る。
 """
@@ -37,26 +38,35 @@ def fail(msg: str) -> None:
     failures.append(msg)
 
 
+def hook_sources() -> list[Path]:
+    files: list[Path] = []
+    for ed in EDITIONS:
+        files += sorted((ROOT / "plugins" / ed / "hooks").glob("*.py"))
+    # Copilot 版: 対象リポジトリへ配るアダプタと、それを配るインストーラ
+    files += sorted((ROOT / "copilot").glob("*.py"))
+    files += sorted((ROOT / "copilot" / "kit" / "hooks").glob("*.py"))
+    return files
+
+
 def check_imports() -> None:
     std = set(sys.stdlib_module_names)
-    for ed in EDITIONS:
-        for p in sorted((ROOT / "plugins" / ed / "hooks").glob("*.py")):
-            try:
-                tree = ast.parse(p.read_text(encoding="utf-8"))
-            except SyntaxError as exc:
-                fail(f"{p.relative_to(ROOT)}: 構文エラー: {exc}")
-                continue
-            for node in ast.walk(tree):
-                mods: list[str] = []
-                if isinstance(node, ast.Import):
-                    mods = [a.name.split(".")[0] for a in node.names]
-                elif isinstance(node, ast.ImportFrom) and node.module and node.level == 0:
-                    mods = [node.module.split(".")[0]]
-                for m in mods:
-                    if m == "__future__" or m in std or m in LOCAL_MODULES:
-                        continue
-                    fail(f"{p.relative_to(ROOT)}: 標準ライブラリ外の import `{m}` "
-                         f"— AXIOM-0 違反（hooks 本体は stdlib のみ）")
+    for p in hook_sources():
+        try:
+            tree = ast.parse(p.read_text(encoding="utf-8"))
+        except SyntaxError as exc:
+            fail(f"{p.relative_to(ROOT)}: 構文エラー: {exc}")
+            continue
+        for node in ast.walk(tree):
+            mods: list[str] = []
+            if isinstance(node, ast.Import):
+                mods = [a.name.split(".")[0] for a in node.names]
+            elif isinstance(node, ast.ImportFrom) and node.module and node.level == 0:
+                mods = [node.module.split(".")[0]]
+            for m in mods:
+                if m == "__future__" or m in std or m in LOCAL_MODULES:
+                    continue
+                fail(f"{p.relative_to(ROOT)}: 標準ライブラリ外の import `{m}` "
+                     f"— AXIOM-0 違反（hooks 本体は stdlib のみ）")
 
 
 def check_no_mandatory_external_tools() -> None:

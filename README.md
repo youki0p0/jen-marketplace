@@ -89,6 +89,21 @@ Lean版の判断則は1行です——**「委譲するのは、単一エージ�
 
 **どちらか片方だけ**をインストールしてください（agent名が共通のため同時有効化は競合します）。
 
+## GitHub Copilot で使う（プレビュー）
+
+同じ Jen を **GitHub Copilot**（VS Code / Copilot CLI / cloud agent）でも使えます。
+`copilot/install.py` が Claude Code 版を原典として読み、Copilot の形式（`.github/agents` / `.github/skills` /
+`.github/hooks`）に変換してあなたのリポジトリへ展開します。証拠ゲートの判定ロジックは Claude 版の hooks をそのまま使います。
+
+```bash
+python3 jen-marketplace/copilot/install.py --target path/to/your-repo --gitignore
+```
+
+Copilot の制約に合わせて、入口（jen-pmo を直接選ぶ）・原文保全（hook が逐語保存）・完了ゲート
+（`decision:"block"`、6回で記録付きで諦める）などを変えています。違いと調査した制約は
+[copilot/README.md](copilot/README.md) と [copilot/docs/COPILOT_CONSTRAINTS.md](copilot/docs/COPILOT_CONSTRAINTS.md) に。
+**実機での動作確認はまだです。**
+
 ## インストール
 
 ```bash
@@ -178,7 +193,8 @@ plugins/jen/
 ├─ commands/    jen-status / jen-board / jen-standup / jen-pr / jen-audit
 ├─ hooks/       証拠台帳・完了ゲート・破壊的操作ガード＋ローカルログ
 └─ templates/   memory / prompts / report テンプレート
-tests/          v4 ハーネスの試験16件 ＋ AXIOM-0 チェッカー（CI で Python 3.10〜3.13 を通す）
+copilot/        GitHub Copilot 版のインストーラと差分（kit/）・制約調査（docs/）
+tests/          v4 ハーネスの試験16件 ＋ Copilot 版の試験11件 ＋ AXIOM-0 チェッカー（CI で Python 3.10〜3.13 を通す）
 ```
 
 ## ライセンス
